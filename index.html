@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>Block Breaker</title>
+    <link rel="stylesheet" type = "text/css" href="styles/style.css">
+    <script src="scrips/game.js"></script>
+</head>
+<body>
+    <div id="main-menu" class="screen">
+        <button>New Game</button>
+        <button>High Scores</button>
+        <button>Credits</button>
+    </div>
+    <div id="game-play" class="screen">
+        <canvas id="canvas-main" width="1000" height="1000"></canvas>
+    </div>
+    <div id="high-scores" class="screen">
+        <h3>High Scores</h3>
+    </div>
+    <div id="credits" class="screen">
+        <h3>Credits</h3>
+        <p>Andrew Aposhian helped by Dr. Dean Mathias</p>
+    </div>
+    <script>
+        let MyGame = {
+            screens: {}
+        };
+    </script>
+    <script src="scripts/game.js"></script>
+    <script src="scripts/gameplay.js"></script>
+</body>
+</html>
