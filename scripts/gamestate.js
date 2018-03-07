@@ -1,8 +1,15 @@
 MyGame.gameState = (function() {
 
+    let balls = [];
+
     let props = {
-        countdown: 5
+        countdown: 5,
+        state: 'countdown'
     };
+
+    function setState(state) {
+        props.state = state;
+    }
 
     function countdown() {
         if (props.countdown >= 0) {
@@ -19,37 +26,64 @@ MyGame.gameState = (function() {
         length: 100,
         velocity: 1
     };
-
-    let balls = [];
     
     function Ball() {
+
+        let innerVelocity = {
+            x: 0,
+            y: 0
+        };
+
+        innerVelocity.setMagnitude = function(newMag) {
+            let direction = innerVelocity.x / innerVelocity.y;
+            let signX = innerVelocity.x > 0 ? 1 : -1;
+            let signY = innerVelocity.y > 0 ? 1 : -1;
+            innerVelocity.y = (newMag * newMag / Math.sqrt(direction * direction + 1)) * signY;
+            innerVelocity.x = Math.abs(direction * innerVelocity.y) * signX;
+        };
+
         let that = {
-            sideLength: 20,
+            sideLength: 5,
             position: {
-                x: (paddle.x - (that.sideLength / 2)),
-                y: 960 // TODO: fix this magic number
+                x: 0,
+                y: 0 
             },
             velocity: {
-                x: 0,
-                y: 0,
-                get magnitude() {
+                get x() { return innerVelocity.x; },
+                get y() { return innerVelocity.y; }
+            },
+            increaseVelocity: function() {
+                innerVelocity.x += 5;
+                innerVelocity.y += 5;
+            },
+            reflect: function() {
 
-                },
-                set magnitude(value) {
+            },
+            paddleBounce: function(posZValue) {
 
-                },
-                get direction() {
+            },
+            serve: function() {
+                let signSelector = Math.floor(Math.random() * 2); // will be a 1 or a 0
+                let randomSign = signSelector < 1 ? -1 : 1;
+                let randomXVelocity = Math.floor(Math.random() * 3) * randomSign;
 
-                },
-                set direction(value) {
+                // Random Y initial velocity should always be negative
+                let randomYVelocity = Math.floor(Math.random() * 10) * (-1);
 
-                }
+                // Set direction
+                innerVelocity.x = randomXVelocity;
+                innerVelocity.y = randomYVelocity;
+
+                // Set magnitude
+                let initialVelocityMagnitude = 0.5;
+                innerVelocity.setMagnitude(initialVelocityMagnitude);
             }
         }
 
-        // Initialize velocity
+        // initialize ball position to be on paddle
+        that.position.x = paddle.x - (that.sideLength / 2);
+        that.position.y = 940; // TODO: fix this magic number
 
-        
         return that;
     }
 
@@ -80,6 +114,8 @@ MyGame.gameState = (function() {
         getPaddleVelocity: getPaddleVelocity,
         getCountdown: getCountdown,
         countdown: countdown,
-        makeNewBall: makeNewBall
+        makeNewBall: makeNewBall,
+        setState: setState,
+        balls, balls
     };
 }());

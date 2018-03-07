@@ -51,6 +51,8 @@ MyGame.screens['game-play'] = (function(game, input, gameState, renderer) {
         keyboard.registerCommand(input.keyCodes.DOM_VK_LEFT, function(elapsedTime) {
             stateChanges.paddleX -= elapsedTime;
         });
+
+        gameState.makeNewBall();
     }
 
     function processInput(elapsedTime) {
@@ -63,12 +65,16 @@ MyGame.screens['game-play'] = (function(game, input, gameState, renderer) {
 
         if (gameState.getCountdown() <= 0) {
             props.update = gamePlayUpdate;
+            gameState.setState('gameplay');
+            for (let i = 0; i < gameState.balls.length; i++) {
+                gameState.balls[i].serve();
+            }
         }
         else if (props.accumulatingSecond >= 1000) {
             gameState.countdown();
             console.log(gameState.getCountdown());
+            props.accumulatingSecond = 0;
         }
-        props.accumulatingSecond = 0;
     }
 
     function gamePlayUpdate(elapsedTime) {
@@ -77,10 +83,16 @@ MyGame.screens['game-play'] = (function(game, input, gameState, renderer) {
         (temp > 0) ? xChange = Math.floor(temp) : xChange = Math.ceil(temp);
         let oldX = gameState.getPaddleX();
         let paddleBuffer = gameState.getPaddleLength() / 2;
-        if (!((paddleBuffer + oldX + xChange) > 999) && !((oldX + xChange - paddleBuffer) < 0)) {
+        if (!((paddleBuffer + oldX + xChange) > 990) && !((oldX + xChange - paddleBuffer) < 10)) {
             gameState.setPaddleX(oldX + xChange);
         }   
         stateChanges.paddleX = 0;
+
+        for (let i = 0; i < gameState.balls.length; i++) {
+            let ball = gameState.balls[i];
+            ball.position.x = Math.floor(ball.position.x + ball.velocity.x * elapsedTime);
+            ball.position.y = Math.floor(ball.position.y + ball.velocity.y * elapsedTime);
+        }
     }
 
     function gameOverUpdate(elapsedTime) {

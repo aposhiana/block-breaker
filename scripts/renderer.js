@@ -17,22 +17,46 @@ MyGame.renderer = (function(gameState) {
         context.beginPath();
         context.strokeStyle = '#1e1e1e';
         context.lineWidth = 10;
-        context.moveTo(0, 999);
-        context.lineTo(0, 0);
-        context.lineTo(999, 0);
-        context.lineTo(999, 999);
+        context.moveTo(5, 1000);
+        context.lineTo(5, 5);
+        context.lineTo(995, 5);
+        context.lineTo(995, 1000);
         context.stroke();
         
+        // Draw paddle
         let paddleLen = gameState.getPaddleLength();
         let paddlePos = gameState.getPaddleX();
         let startPaddle = paddlePos - (paddleLen / 2);
         context.beginPath();
         context.strokeStyle = '#FFFFFF';
-        context.lineWidth = 20;
-        context.lineWidth = 20;
-        context.moveTo(startPaddle, 975);
-        context.lineTo(startPaddle + paddleLen, 975)
+        context.lineWidth = 1;
+        context.moveTo(startPaddle, 950);
+        context.lineTo(startPaddle + paddleLen, 950);
+        context.lineTo(startPaddle + paddleLen, 970);
+        context.lineTo(startPaddle, 970);
+        context.closePath();
+        context.fillStyle = '#FFFFFF';
+        context.fill();
         context.stroke();
+
+        // Draw balls
+        for (let i = 0; i < gameState.balls.length; i++) {
+            let topLeftBallX = gameState.balls[i].position.x;
+            let topLeftBallY = gameState.balls[i].position.y;
+            let ballSideLength = gameState.balls[i].sideLength;
+
+            context.beginPath();
+            context.strokeStyle = '#FFFFFF';
+            context.lineWidth = 1;
+            context.moveTo(topLeftBallX, topLeftBallY);
+            context.lineTo(topLeftBallX + ballSideLength, topLeftBallY);
+            context.lineTo(topLeftBallX + ballSideLength, topLeftBallY + ballSideLength);
+            context.lineTo(topLeftBallX, topLeftBallY + ballSideLength);
+            context.closePath();
+            context.fillStyle = '#ccff15';
+            context.fill();
+            context.stroke();
+        }
     }
 
     return {
