@@ -9,7 +9,7 @@ MyGame.screens['credits'] = (function(game) {
     let props = {
         lastTimeStamp: performance.now(),
         cancelNextRequest: false
-    }
+    };
 
     let keyboard = Input.Keyboard();
 

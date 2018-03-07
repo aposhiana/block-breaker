@@ -9,7 +9,7 @@ MyGame.screens['high-scores'] = (function(game) {
     let props = {
         lastTimeStamp: performance.now(),
         cancelNextRequest: false
-    }
+    };
 
     let keyboard = Input.Keyboard();
 
