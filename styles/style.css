@@ -5,3 +5,8 @@
 .screen.active {
     display: block;
 }
+
+.container {
+    display: flex;
+    flex-direction: column;
+}

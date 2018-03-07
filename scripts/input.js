@@ -1,6 +1,48 @@
 let Input = (function() {
-
-    // Source: http://stackoverflow.com/questions/1465374/javascript-event-keycode-constants
+    'use strict';
+    
+    //
+    // This Keyboard constructor function was originally written by Dr. Dean Mathias;
+    // it has been slightly modified by Andrew Aposhian.
+    function Keyboard() {
+		let that = {
+			keys: {},
+			handlers: []
+		};
+		
+		function keyPress(e) {
+			that.keys[e.keyCode] = e.timeStamp;
+		}
+		
+		function keyRelease(e) {
+			delete that.keys[e.keyCode];
+		}
+		
+		//
+		// Allows the client code to register a keyboard handler
+		that.registerCommand = function(key, handler) {
+			that.handlers.push({ key: key, handler: handler });
+		};
+		
+		//
+		// Allows the client to invoke all the handlers for the registered key/handlers
+		that.handleEvents = function(elapsedTime) {
+			for (let i = 0; i < that.handlers.length; i++) {
+                let handler = that.handlers[i];
+				if (that.keys.hasOwnProperty(handler.key)) {
+					handler.handler(elapsedTime);
+				}
+			}
+		};
+		
+		// These are used to keep track of which keys are currently pressed
+		window.addEventListener('keydown', keyPress);
+		window.addEventListener('keyup', keyRelease);
+		
+		return that;
+	}
+	
+	// Source: http://stackoverflow.com/questions/1465374/javascript-event-keycode-constants
     let keyCodes = {
     	DOM_VK_CANCEL: 3,
     	DOM_VK_HELP: 6,
@@ -118,47 +160,6 @@ let Input = (function() {
     	DOM_VK_QUOTE: 222,
     	DOM_VK_META: 224
     };
-
-    //
-    // This Keyboard constructor function was originally written by Dr. Dean Mathias;
-    // it has been slightly modified by Andrew Aposhian.
-    function Keyboard() {
-		let that = {
-			keys : {},
-			handlers : []
-		};
-		
-		function keyPress(e) {
-			that.keys[e.keyCode] = e.timeStamp;
-		}
-		
-		function keyRelease(e) {
-			delete that.keys[e.keyCode];
-		}
-		
-		//
-		// Allows the client code to register a keyboard handler
-		that.registerCommand = function(key, handler) {
-			that.handlers.push({ key : key, handler : handler });
-		};
-		
-		//
-		// Allows the client to invoke all the handlers for the registered key/handlers.
-		that.update = function(elapsedTime) {
-			for (let i = 0; i < that.handlers.length; i++) {
-                let handler = that.handlers[i];
-				if (that.keys.hasOwnProperty(handler.key)) {
-					handler.handler(elapsedTime);
-				}
-			}
-		};
-		
-		// These are used to keep track of which keys are currently pressed
-		window.addEventListener('keydown', keyPress);
-		window.addEventListener('keyup', keyRelease);
-		
-		return that;
-    }
     
     return {
         keyCodes: keyCodes,

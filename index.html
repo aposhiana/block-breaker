@@ -4,31 +4,39 @@
     <meta charset="utf-8">
     <title>Block Breaker</title>
     <link rel="stylesheet" type = "text/css" href="styles/style.css">
-    <script src="scrips/game.js"></script>
+    <script>
+        let MyGame = {
+            screens: {}
+        };
+    </script>
+     <script src="scripts/input.js"></script>
+     <script src="scripts/game.js"></script>
+     <script src="scripts/mainmenu.js"></script>
+     <script src="scripts/credits.js"></script>
+     <script src="scripts/highscores.js"></script>
+     <script src="scripts/gamestate.js"></script>
+     <script src="scripts/renderer.js"></script>
+     <script src="scripts/gameplay.js"></script>
 </head>
-<body>
+<body onload="MyGame.game.initialize()">
     <div id="main-menu" class="screen">
-        <button>New Game</button>
-        <button>High Scores</button>
-        <button>Credits</button>
+        <div class="container">
+            <button onclick="MyGame.game.showScreen('game-play')">New Game</button>
+            <button onclick="MyGame.game.showScreen('high-scores')">High Scores</button>
+            <button onclick="MyGame.game.showScreen('credits')">Credits</button>
+        </div>
     </div>
     <div id="game-play" class="screen">
         <canvas id="canvas-main" width="1000" height="1000"></canvas>
     </div>
     <div id="high-scores" class="screen">
         <h3>High Scores</h3>
+        <button id="high-scores-back">Back</button>
     </div>
     <div id="credits" class="screen">
         <h3>Credits</h3>
         <p>Andrew Aposhian helped by Dr. Dean Mathias</p>
+        <button id="credits-back">Back</button>
     </div>
-    <script>
-        let MyGame = {
-            screens: {}
-        };
-    </script>
-    <script src="scripts/input.js"></script>
-    <script src="scripts/game.js"></script>
-    <script src="scripts/gameplay.js"></script>
 </body>
 </html>

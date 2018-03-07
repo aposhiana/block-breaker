@@ -23,61 +23,17 @@ MyGame.game = (function(screens) {
     //
     // This function does the one-time game initialization
     function initialize() {
-        for (let screen of screens) {
+        for (let screen in screens) {
             if (screens.hasOwnProperty(screen)) {
-                screen.initialize();
+                screens[screen].initialize();
             }
         }
 
         showScreen('main-menu');
     }
+
+    return {
+        showScreen: showScreen,
+        initialize: initialize
+    };
 }(MyGame.screens));
-
-// ------------------------------------------------------------------
-// 
-// A screen to be used by credits and high-scores
-//
-// ------------------------------------------------------------------
-let defaultScreen = (function(game) {
-    'use strict';
-
-    let keyboard = Input.Keyboard();
-
-    function initialize() {
-        keyboard.registerCommand(Input.keyCodes.DOM_VK_ESCAPE, game.showScreen('main-menu'));
-    }
-
-    function run() {
-        // Does nothing
-    }
-
-    return {
-        initialize: initialize,
-        run: run
-    };
-}(MyGame.game));
-
-MyGame.screens['credits'] = defaultScreen;
-MyGame.screens['high-scores'] = defaultScreen;
-
-// ------------------------------------------------------------------
-// 
-// Screen for main-menu
-//
-// ------------------------------------------------------------------
-MyGame.screens['main-menu'] = (function(game) {
-    'use strict';
-
-    function initialize() {
-        // Does nothing
-    }
-
-    function run() {
-        // Does nothing
-    }
-
-    return {
-        initialize: initialize,
-        run: run
-    };
-}(MyGame.game));;
