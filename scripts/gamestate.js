@@ -42,8 +42,13 @@ MyGame.gameState = (function() {
             innerVelocity.x = Math.abs(direction * innerVelocity.y) * signX;
         };
 
+        innerVelocity.getMagnitude = function() {
+            return Math.sqrt((innerVelocity.x * innerVelocity.x) + (innerVelocity.y * innerVelocity.y));
+        };
+
         let that = {
-            sideLength: 5,
+            sideLength: 10,
+            collisionImmunity: 0.0,
             position: {
                 x: 0,
                 y: 0 
@@ -56,8 +61,16 @@ MyGame.gameState = (function() {
                 innerVelocity.x += 5;
                 innerVelocity.y += 5;
             },
-            reflect: function() {
-
+            reflect: function(positiveReflection) {
+                let oldX = innerVelocity.x;
+                if (positiveReflection) {
+                    innerVelocity.x = innerVelocity.y;
+                    innerVelocity.y = 0 - oldX;
+                }
+                else {
+                    innerVelocity.x = 0 - innerVelocity.y;
+                    innerVelocity.y = oldX;
+                }
             },
             paddleBounce: function(posZValue) {
 
@@ -65,10 +78,10 @@ MyGame.gameState = (function() {
             serve: function() {
                 let signSelector = Math.floor(Math.random() * 2); // will be a 1 or a 0
                 let randomSign = signSelector < 1 ? -1 : 1;
-                let randomXVelocity = Math.floor(Math.random() * 3) * randomSign;
+                let randomXVelocity = (Math.floor(Math.random() * 3) + 1) * randomSign;
 
                 // Random Y initial velocity should always be negative
-                let randomYVelocity = Math.floor(Math.random() * 10) * (-1);
+                let randomYVelocity = 0 - (Math.floor(Math.random() + 1) * 10);
 
                 // Set direction
                 innerVelocity.x = randomXVelocity;

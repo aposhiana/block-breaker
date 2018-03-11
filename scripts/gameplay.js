@@ -77,7 +77,150 @@ MyGame.screens['game-play'] = (function(game, input, gameState, renderer) {
         }
     }
 
-    function gamePlayUpdate(elapsedTime) {
+    //
+    // Updates ball velocities if there were any wall collisions
+    // Returns true if there was a wall collision otherwise returns false
+    function handleWallCollisions(elapsedTime) {
+        let anyWallCollisions = false;
+        for (let i = 0; i < gameState.balls.length; i++) {
+            let ball = gameState.balls[i];
+
+            if (ball.collisionImmunity > 0) {
+                continue;
+            }
+
+            let wallCollision = false;
+            let positiveReflection = null;
+            let timeToEscape = null;
+
+            if ((ball.position.x + ball.sideLength) > 990) {
+                wallCollision = true;
+
+                let distanceToEscape = (ball.position.x + ball.sideLength) - 990;
+                // Divide by the velocity of the opposite dimension to account for the reflection
+                if (Math.abs(ball.velocity.y) > 0.001) {
+                    timeToEscape = distanceToEscape / Math.abs(ball.velocity.y);
+                }
+                else {
+                    timeToEscape = 0;
+                }
+
+                // if (timeToEscape > 200) {
+                //     ball.position.y -= distanceToEscape;
+                //     timeToEscape = 0;
+                // }
+
+                if (ball.velocity.y < 0) {
+                    positiveReflection = true;
+                }
+                else {
+                    positiveReflection = false;
+                }
+            }
+            else if (ball.position.x < 10) {
+                wallCollision = true;
+
+                let distanceToEscape = 10 - ball.position.x;
+                // Divide by the velocity of the opposite dimension to account for the reflection
+                if (Math.abs(ball.velocity.y) > 0.001) {
+                    timeToEscape = distanceToEscape / Math.abs(ball.velocity.y);
+                }
+                else {
+                    timeToEscape = 0;
+                }
+
+                // if (timeToEscape > 200) {
+                //     ball.position.x += distanceToEscape;
+                //     timeToEscape = 0;
+                // }
+
+                if (ball.velocity.y < 0) {
+                    positiveReflection = false;
+                }
+                else {
+                    positiveReflection = true;
+                }
+            }
+            else if (ball.position.y < 10) {
+                wallCollision = true;
+
+                let distanceToEscape = 10 - ball.position.y;
+                // Divide by the velocity of the opposite dimension to account for the reflection
+                if (Math.abs(ball.velocity.x) > 0.001) {
+                    timeToEscape = distanceToEscape / Math.abs(ball.velocity.x);
+                }
+                else {
+                    timeToEscape = 0;
+                }
+
+                // if (timeToEscape > 200) {
+                //     ball.position.y += distanceToEscape;
+                //     timeToEscape = 0;
+                // }
+
+                if (ball.velocity.x < 0) {
+                    positiveReflection = true;
+                }
+                else {
+                    positiveReflection = false;
+                }
+            }
+            else if (ball.position.y > 990) {
+                wallCollision = true;
+
+                let distanceToEscape =  ball.position.y - 990;
+                // Divide by the velocity of the opposite dimension to account for the reflection
+                if (Math.abs(ball.velocity.x) > 0.001) {
+                    timeToEscape = distanceToEscape / Math.abs(ball.velocity.x);
+                }
+                else {
+                    timeToEscape = 0;
+                }
+
+                // if (timeToEscape > 200) {
+                //     ball.position.y -= distanceToEscape;
+                //     timeToEscape = 0;
+                // }
+
+                if (ball.velocity.x < 0) {
+                    positiveReflection = false;
+                }
+                else {
+                    positiveReflection = true;
+                }
+            }
+
+            if (wallCollision) {
+                ball.collisionImmunity = timeToEscape + 30;
+                ball.reflect(positiveReflection);
+                anyWallCollisions = true;
+            }
+        }
+        if (anyWallCollisions) {
+            return true;
+        }
+        else {
+            return false;
+        }   
+    }
+
+    //
+    // Updates ball velocities if there were any paddle collisions
+    // Returns true if there was a wall collision otherwise returns false
+    function handlePaddleCollisions(elapsedTime) {
+
+    }
+
+    //
+    // Updates ball velocities if there were any brick collisions
+    // Returns true if there was a wall collision otherwise returns false
+    function handleBrickCollisions(elapsedTime) {
+
+    }
+
+    //
+    // Updates the position of the balls and also decrements their collision immunity
+    function updateBallPositions(elapsedTime) {
         let xChange = null;
         let temp = stateChanges.paddleX * gameState.getPaddleVelocity();
         (temp > 0) ? xChange = Math.floor(temp) : xChange = Math.ceil(temp);
@@ -92,7 +235,23 @@ MyGame.screens['game-play'] = (function(game, input, gameState, renderer) {
             let ball = gameState.balls[i];
             ball.position.x = Math.floor(ball.position.x + ball.velocity.x * elapsedTime);
             ball.position.y = Math.floor(ball.position.y + ball.velocity.y * elapsedTime);
+
+            if ((ball.collisionImmunity - elapsedTime) > 0) {
+                ball.collisionImmunity -= elapsedTime;
+            }
+            else {
+                ball.collisionImmunity = 0;
+            }
         }
+    }
+
+    function gamePlayUpdate(elapsedTime) {
+        if (!handleWallCollisions(elapsedTime)) {
+            if (!handlePaddleCollisions(elapsedTime)) {
+                handleBrickCollisions(elapsedTime);
+            }
+        }
+        updateBallPositions(elapsedTime);
     }
 
     function gameOverUpdate(elapsedTime) {
