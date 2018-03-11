@@ -1,6 +1,7 @@
 MyGame.gameState = (function() {
 
     let balls = [];
+    let bricks = [];
 
     let props = {
         countdown: 5,
@@ -26,6 +27,47 @@ MyGame.gameState = (function() {
         length: 100,
         velocity: 1
     };
+
+    //
+    // Takes a spec with attributes points, x, and y
+    function Brick(spec) {
+        let that = {
+            visible: true,
+            points: spec.points,
+            position: {
+                x: spec.x,
+                y: spec.y
+            }
+        }
+        return that;
+    }
+
+    function initializeBricks() {
+        let NUM_ROWS = 8;
+        let NUM_COLS = 14;
+        let BRICK_WIDTH = 65;
+        let BRICK_HEIGHT = 30;
+        let pointsPerBrickByRow = [1, 2, 3, 5, 25];
+        let SPACE = 5;
+
+        let rowHeight = 200; // Set to height of first row
+        for (let row = 0; row < NUM_ROWS; row++) {
+            let row = [];
+        
+            let colX = SPACE + 7; // Set to the x offset of first bricks in a row
+            for (let col = 0; col < NUM_COLS; col++) {
+                let spec = {
+                    points: pointsPerBrickByRow[row],
+                    x: colX,
+                    y: rowHeight
+                }
+                row.push(Brick(spec));
+                colX += (SPACE + BRICK_WIDTH);
+            }
+            bricks.push(row);
+            rowHeight += (SPACE + BRICK_HEIGHT);
+        }
+    }
     
     function Ball() {
 
@@ -73,7 +115,7 @@ MyGame.gameState = (function() {
                 }
             },
             paddleBounce: function(posZValue) {
-
+                
             },
             serve: function() {
                 let signSelector = Math.floor(Math.random() * 2); // will be a 1 or a 0
@@ -94,8 +136,9 @@ MyGame.gameState = (function() {
         }
 
         // initialize ball position to be on paddle
+        let PADDLE_START_Y = 930;
         that.position.x = paddle.x - (that.sideLength / 2);
-        that.position.y = 940; // TODO: fix this magic number
+        that.position.y = PADDLE_START_Y - that.sideLength;
 
         return that;
     }
@@ -129,6 +172,8 @@ MyGame.gameState = (function() {
         countdown: countdown,
         makeNewBall: makeNewBall,
         setState: setState,
-        balls, balls
+        balls: balls,
+        bricks: bricks,
+        initializeBricks: initializeBricks
     };
 }());

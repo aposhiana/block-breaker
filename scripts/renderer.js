@@ -22,18 +22,46 @@ MyGame.renderer = (function(gameState) {
         context.lineTo(995, 5);
         context.lineTo(995, 1000);
         context.stroke();
+
+        // Draw bricks
+        let BRICK_WIDTH = 65;
+        let BRICK_HEIGHT = 30;
+        let brickColors = [
+            '#42f46b', '#42f46b',
+            '#494cfc', '#494cfc',
+            '#ff9000', '#ff9000',
+            '#fffa35', '#fffa35'
+        ];
+        for (let row = 0; row < gameState.bricks.length; row++) {
+            for (let col = 0; col < gameState.bricks[row].length; col++) {
+                let brickPos = gameState.bricks[row][col].position;
+                context.beginPath();
+                context.strokeStyle = brickColors[row];
+                context.lineWidth = 1;
+                context.moveTo(brickPos.x, brickPos.y);
+                context.lineTo(brickPos.x + BRICK_WIDTH, brickPos.y);
+                context.lineTo(brickPos.x + BRICK_WIDTH, brickPos.y + BRICK_HEIGHT);
+                context.lineTo(brickPos.x, brickPos.y + BRICK_HEIGHT);
+                context.closePath();
+                context.fillStyle = brickColors[row];
+                context.fill();
+                context.stroke();
+            } 
+        }
         
         // Draw paddle
+        let PADDLE_START_Y = 930;
+        let PADDLE_HEIGHT = 20;
         let paddleLen = gameState.getPaddleLength();
         let paddlePos = gameState.getPaddleX();
         let startPaddle = paddlePos - (paddleLen / 2);
         context.beginPath();
         context.strokeStyle = '#FFFFFF';
         context.lineWidth = 1;
-        context.moveTo(startPaddle, 950);
-        context.lineTo(startPaddle + paddleLen, 950);
-        context.lineTo(startPaddle + paddleLen, 970);
-        context.lineTo(startPaddle, 970);
+        context.moveTo(startPaddle, PADDLE_START_Y);
+        context.lineTo(startPaddle + paddleLen, PADDLE_START_Y);
+        context.lineTo(startPaddle + paddleLen, PADDLE_START_Y + PADDLE_HEIGHT);
+        context.lineTo(startPaddle, PADDLE_START_Y + PADDLE_HEIGHT);
         context.closePath();
         context.fillStyle = '#FFFFFF';
         context.fill();

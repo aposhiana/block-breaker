@@ -52,6 +52,7 @@ MyGame.screens['game-play'] = (function(game, input, gameState, renderer) {
             stateChanges.paddleX -= elapsedTime;
         });
 
+        gameState.initializeBricks();
         gameState.makeNewBall();
     }
 
@@ -208,7 +209,32 @@ MyGame.screens['game-play'] = (function(game, input, gameState, renderer) {
     // Updates ball velocities if there were any paddle collisions
     // Returns true if there was a wall collision otherwise returns false
     function handlePaddleCollisions(elapsedTime) {
+        let halfPaddleDist = Math.floor(gameState.paddle.getPaddleLength() / 2)
+        let paddleCenter = gameState.paddle.getPaddleX() - halfPaddleDist;
+        let PADDLE_START_Y = 930;
+        let PADDLE_HEIGHT = 20;
 
+        let anyPaddleCollisions = false;
+
+        for (let i = 0; i < gameState.balls.length; i++) {
+            let ball = gameState.balls[i];
+
+            let paddleCollision = false;
+            let timeToEscape = null;
+            
+            if (ball.collisionImmunity > 0) {
+                continue;
+            }
+
+            if ((ball.position.y > PADDLE_START_Y) && (ball.position.y < PADDLE_START_Y + PADDLE_HEIGHT)) {
+                if ((ball.position.x < (paddleCenter + halfPaddleDist)) && (ball.position.x > (paddleCenter - halfPaddleDist))) {
+                    paddleCollision = true;
+                    let posZValue = Math.floor((ball.position.x - paddleCenter) / halfPaddleDist);
+                    ball.paddleBounce(posZValue);
+                }
+            }
+        }
+        
     }
 
     //
