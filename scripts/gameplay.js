@@ -2,7 +2,7 @@ MyGame.screens['game-play'] = (function(game, input, gameState, renderer) {
     'use strict';
 
     let props = {
-        lastTimeStamp: performance.now(),
+        lastTimeStamp: null,
         cancelNextRequest: false,
         canvas: null,
         context: null,
@@ -15,6 +15,30 @@ MyGame.screens['game-play'] = (function(game, input, gameState, renderer) {
     let stateChanges = {
         paddleX: 0,
     };
+
+    function startNewGame() {
+        props.cancelNextRequest = false;
+        
+        // Set up new game
+        gameState.wipeGameState();
+        gameState.initializeBricks();
+        gameState.makeNewBall();
+
+        // Set or reset newGame flag to false
+        gameState.setNewGameProperty(false);
+        
+        // Start game loop
+        props.lastTimeStamp = performance.now();
+        requestAnimationFrame(gameLoop);
+    }
+
+    function resumeGame() {
+        props.cancelNextRequest = false;
+
+        // Start game loop
+        props.lastTimeStamp = performance.now();
+        requestAnimationFrame(gameLoop);
+    }
 
     function initialize() {
         console.log('game initializing...');
@@ -43,7 +67,7 @@ MyGame.screens['game-play'] = (function(game, input, gameState, renderer) {
 
         keyboard.registerCommand(input.keyCodes.DOM_VK_ESCAPE, function() {
             props.cancelNextRequest = true;
-            game.showScreen('main-menu');
+            game.showScreen('paused-menu');
         });
         keyboard.registerCommand(input.keyCodes.DOM_VK_RIGHT, function(elapsedTime) {
             stateChanges.paddleX += elapsedTime;
@@ -51,9 +75,6 @@ MyGame.screens['game-play'] = (function(game, input, gameState, renderer) {
         keyboard.registerCommand(input.keyCodes.DOM_VK_LEFT, function(elapsedTime) {
             stateChanges.paddleX -= elapsedTime;
         });
-
-        gameState.initializeBricks();
-        gameState.makeNewBall();
     }
 
     function processInput(elapsedTime) {
@@ -86,113 +107,51 @@ MyGame.screens['game-play'] = (function(game, input, gameState, renderer) {
         for (let i = 0; i < gameState.balls.length; i++) {
             let ball = gameState.balls[i];
 
-            if (ball.collisionImmunity > 0) {
-                continue;
-            }
-
             let wallCollision = false;
-            let positiveReflection = null;
-            let timeToEscape = null;
+            let positiveReflection = false;
 
             if ((ball.position.x + ball.sideLength) > 990) {
                 wallCollision = true;
 
-                let distanceToEscape = (ball.position.x + ball.sideLength) - 990;
-                // Divide by the velocity of the opposite dimension to account for the reflection
-                if (Math.abs(ball.velocity.y) > 0.001) {
-                    timeToEscape = distanceToEscape / Math.abs(ball.velocity.y);
-                }
-                else {
-                    timeToEscape = 0;
-                }
-
-                // if (timeToEscape > 200) {
-                //     ball.position.y -= distanceToEscape;
-                //     timeToEscape = 0;
-                // }
+                // Set the position outside of the wall
+                ball.position.y -= (ball.position.x + ball.sideLength) - 990;
 
                 if (ball.velocity.y < 0) {
                     positiveReflection = true;
-                }
-                else {
-                    positiveReflection = false;
                 }
             }
             else if (ball.position.x < 10) {
                 wallCollision = true;
 
-                let distanceToEscape = 10 - ball.position.x;
-                // Divide by the velocity of the opposite dimension to account for the reflection
-                if (Math.abs(ball.velocity.y) > 0.001) {
-                    timeToEscape = distanceToEscape / Math.abs(ball.velocity.y);
-                }
-                else {
-                    timeToEscape = 0;
-                }
+                // Set the position outside of the wall
+                ball.position.x += 10 - ball.position.x;
 
-                // if (timeToEscape > 200) {
-                //     ball.position.x += distanceToEscape;
-                //     timeToEscape = 0;
-                // }
-
-                if (ball.velocity.y < 0) {
-                    positiveReflection = false;
-                }
-                else {
+                if (ball.velocity.y > 0) {
                     positiveReflection = true;
                 }
             }
             else if (ball.position.y < 10) {
                 wallCollision = true;
 
-                let distanceToEscape = 10 - ball.position.y;
-                // Divide by the velocity of the opposite dimension to account for the reflection
-                if (Math.abs(ball.velocity.x) > 0.001) {
-                    timeToEscape = distanceToEscape / Math.abs(ball.velocity.x);
-                }
-                else {
-                    timeToEscape = 0;
-                }
-
-                // if (timeToEscape > 200) {
-                //     ball.position.y += distanceToEscape;
-                //     timeToEscape = 0;
-                // }
+                // Set the position outside of the wall
+                ball.position.y += 10 - ball.position.y;
 
                 if (ball.velocity.x < 0) {
                     positiveReflection = true;
-                }
-                else {
-                    positiveReflection = false;
                 }
             }
             else if (ball.position.y > 990) {
                 wallCollision = true;
 
-                let distanceToEscape =  ball.position.y - 990;
-                // Divide by the velocity of the opposite dimension to account for the reflection
-                if (Math.abs(ball.velocity.x) > 0.001) {
-                    timeToEscape = distanceToEscape / Math.abs(ball.velocity.x);
-                }
-                else {
-                    timeToEscape = 0;
-                }
+                // Set the position outside of the wall
+                ball.position.y -= ball.position.y - 990;
 
-                // if (timeToEscape > 200) {
-                //     ball.position.y -= distanceToEscape;
-                //     timeToEscape = 0;
-                // }
-
-                if (ball.velocity.x < 0) {
-                    positiveReflection = false;
-                }
-                else {
+                if (ball.velocity.x > 0) {
                     positiveReflection = true;
                 }
             }
 
             if (wallCollision) {
-                ball.collisionImmunity = timeToEscape + 30;
                 ball.reflect(positiveReflection);
                 anyWallCollisions = true;
             }
@@ -209,8 +168,8 @@ MyGame.screens['game-play'] = (function(game, input, gameState, renderer) {
     // Updates ball velocities if there were any paddle collisions
     // Returns true if there was a wall collision otherwise returns false
     function handlePaddleCollisions(elapsedTime) {
-        let halfPaddleDist = Math.floor(gameState.paddle.getPaddleLength() / 2)
-        let paddleCenter = gameState.paddle.getPaddleX() - halfPaddleDist;
+        let halfPaddleDist = Math.floor(gameState.getPaddleLength() / 2)
+        let paddleCenter = gameState.getPaddleX() - halfPaddleDist;
         let PADDLE_START_Y = 930;
         let PADDLE_HEIGHT = 20;
 
@@ -222,9 +181,6 @@ MyGame.screens['game-play'] = (function(game, input, gameState, renderer) {
             let paddleCollision = false;
             let timeToEscape = null;
             
-            if (ball.collisionImmunity > 0) {
-                continue;
-            }
 
             if ((ball.position.y > PADDLE_START_Y) && (ball.position.y < PADDLE_START_Y + PADDLE_HEIGHT)) {
                 if ((ball.position.x < (paddleCenter + halfPaddleDist)) && (ball.position.x > (paddleCenter - halfPaddleDist))) {
@@ -245,7 +201,7 @@ MyGame.screens['game-play'] = (function(game, input, gameState, renderer) {
     }
 
     //
-    // Updates the position of the balls and also decrements their collision immunity
+    // Updates the position of the balls
     function updateBallPositions(elapsedTime) {
         let xChange = null;
         let temp = stateChanges.paddleX * gameState.getPaddleVelocity();
@@ -261,13 +217,6 @@ MyGame.screens['game-play'] = (function(game, input, gameState, renderer) {
             let ball = gameState.balls[i];
             ball.position.x = Math.floor(ball.position.x + ball.velocity.x * elapsedTime);
             ball.position.y = Math.floor(ball.position.y + ball.velocity.y * elapsedTime);
-
-            if ((ball.collisionImmunity - elapsedTime) > 0) {
-                ball.collisionImmunity -= elapsedTime;
-            }
-            else {
-                ball.collisionImmunity = 0;
-            }
         }
     }
 
@@ -300,8 +249,12 @@ MyGame.screens['game-play'] = (function(game, input, gameState, renderer) {
     }
 
     function run() {
-        props.cancelNextRequest = false;
-        requestAnimationFrame(gameLoop);
+        if (gameState.getNewGameProperty()) {
+            startNewGame();
+        }
+        else {
+            resumeGame();
+        }
     }
 
     return {

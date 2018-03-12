@@ -1,12 +1,40 @@
 MyGame.gameState = (function() {
+    'use strict';
 
     let balls = [];
     let bricks = [];
 
     let props = {
-        countdown: 5,
-        state: 'countdown'
+        countdown: 3,
+        state: 'countdown',
+        newGame: true
     };
+
+    let paddle = {
+        x: 500,
+        length: 100,
+        velocity: 1
+    };
+
+    function wipeGameState() {
+        balls.splice(0, balls.length);
+        bricks.splice(0, bricks.length);
+
+        props.countdown = 3;
+        props.state = 'countdown';
+
+        paddle.x = 500;
+        paddle.length = 100;
+        paddle.velocity = 1;
+    }
+
+    function setNewGameProperty(value) {
+        props.newGame = value;
+    }
+
+    function getNewGameProperty() {
+        return props.newGame;
+    }
 
     function setState(state) {
         props.state = state;
@@ -22,11 +50,7 @@ MyGame.gameState = (function() {
         return props.countdown;
     }
 
-    let paddle = {
-        x: 500,
-        length: 100,
-        velocity: 1
-    };
+   
 
     //
     // Takes a spec with attributes points, x, and y
@@ -90,7 +114,6 @@ MyGame.gameState = (function() {
 
         let that = {
             sideLength: 10,
-            collisionImmunity: 0.0,
             position: {
                 x: 0,
                 y: 0 
@@ -115,19 +138,16 @@ MyGame.gameState = (function() {
                 }
             },
             paddleBounce: function(posZValue) {
-                
+
             },
             serve: function() {
                 let signSelector = Math.floor(Math.random() * 2); // will be a 1 or a 0
                 let randomSign = signSelector < 1 ? -1 : 1;
-                let randomXVelocity = (Math.floor(Math.random() * 3) + 1) * randomSign;
-
-                // Random Y initial velocity should always be negative
-                let randomYVelocity = 0 - (Math.floor(Math.random() + 1) * 10);
+                let randomXVelocity = (Math.random() + 0.2) * randomSign;
 
                 // Set direction
                 innerVelocity.x = randomXVelocity;
-                innerVelocity.y = randomYVelocity;
+                innerVelocity.y = -1; // y initial velocity needs to be negative
 
                 // Set magnitude
                 let initialVelocityMagnitude = 0.5;
@@ -174,6 +194,9 @@ MyGame.gameState = (function() {
         setState: setState,
         balls: balls,
         bricks: bricks,
-        initializeBricks: initializeBricks
+        initializeBricks: initializeBricks,
+        wipeGameState: wipeGameState,
+        setNewGameProperty: setNewGameProperty,
+        getNewGameProperty: getNewGameProperty
     };
 }());

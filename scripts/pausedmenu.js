@@ -1,9 +1,9 @@
 // ------------------------------------------------------------------
 // 
-// The credits screen
+// The paused menu screen
 //
 // ------------------------------------------------------------------
-MyGame.screens['credits'] = (function(game) {
+MyGame.screens['paused-menu'] = (function(game, gameState) {
     'use strict';
 
     let props = {
@@ -13,17 +13,16 @@ MyGame.screens['credits'] = (function(game) {
 
     let keyboard = Input.Keyboard();
 
-    function goBack() {
-        game.showScreen('main-menu');
-        props.cancelNextRequest = true;
-    }
-
     function initialize() {
-        keyboard.registerCommand(Input.keyCodes.DOM_VK_ESCAPE, function() {
+        document.getElementById('button-resume').addEventListener('click', function() {
+            game.showScreen('game-play');
             props.cancelNextRequest = true;
-            game.showScreen('main-menu');
         });
-        document.getElementById('credits-back').addEventListener('click', goBack);
+        document.getElementById('button-quit-game').addEventListener('click', function() {
+            gameState.setNewGameProperty(true);
+            game.showScreen('main-menu');
+            props.cancelNextRequest = true;
+        });
     }
 
     function signalLoop(time) {
@@ -43,4 +42,4 @@ MyGame.screens['credits'] = (function(game) {
         initialize: initialize,
         run: run
     };
-}(MyGame.game));
+}(MyGame.game, MyGame.gameState));

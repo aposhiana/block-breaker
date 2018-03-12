@@ -17,6 +17,7 @@
      <script src="scripts/gamestate.js"></script>
      <script src="scripts/renderer.js"></script>
      <script src="scripts/gameplay.js"></script>
+     <script src="scripts/pausedmenu.js"></script>
 </head>
 <body onload="MyGame.game.initialize()">
     <div id="main-menu" class="screen">
@@ -38,5 +39,10 @@
         <p>Andrew Aposhian helped by Dr. Dean Mathias</p>
         <button id="credits-back">Back</button>
     </div>
+    <div id="paused-menu" class="screen">
+            <h3>Game Paused</h3>
+            <button id="button-resume">Resume</button>
+            <button id="button-quit-game">Quit Game</button>
+        </div>
 </body>
 </html>

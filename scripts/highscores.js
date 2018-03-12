@@ -15,7 +15,7 @@ MyGame.screens['high-scores'] = (function(game) {
 
     function goBack() {
         game.showScreen('main-menu');
-        cancelNextRequest = true;
+        props.cancelNextRequest = true;
     }
 
     function initialize() {
