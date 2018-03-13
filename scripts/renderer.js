@@ -53,8 +53,7 @@ MyGame.renderer = (function(gameState) {
         let PADDLE_START_Y = 930;
         let PADDLE_HEIGHT = 20;
         let paddleLen = gameState.getPaddleLength();
-        let paddlePos = gameState.getPaddleX();
-        let startPaddle = paddlePos - (paddleLen / 2);
+        let startPaddle = gameState.getPaddleX() - (paddleLen / 2);
         context.beginPath();
         context.strokeStyle = '#FFFFFF';
         context.lineWidth = 1;

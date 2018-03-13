@@ -18,6 +18,8 @@ MyGame.screens['game-play'] = (function(game, input, gameState, renderer) {
 
     function startNewGame() {
         props.cancelNextRequest = false;
+
+        props.update = countdownUpdate;
         
         // Set up new game
         gameState.wipeGameState();
@@ -108,54 +110,35 @@ MyGame.screens['game-play'] = (function(game, input, gameState, renderer) {
             let ball = gameState.balls[i];
 
             let wallCollision = false;
-            let positiveReflection = false;
+            let yReflection = false;
 
             if ((ball.position.x + ball.sideLength) > 990) {
                 wallCollision = true;
 
-                // Set the position outside of the wall
-                ball.position.y -= (ball.position.x + ball.sideLength) - 990;
-
-                if (ball.velocity.y < 0) {
-                    positiveReflection = true;
-                }
+                // Set the ball position outside of the wall
+                ball.position.x -= (ball.position.x + ball.sideLength) - 990;
             }
             else if (ball.position.x < 10) {
                 wallCollision = true;
 
-                // Set the position outside of the wall
-                ball.position.x += 10 - ball.position.x;
-
-                if (ball.velocity.y > 0) {
-                    positiveReflection = true;
-                }
+                // Set the ball position outside of the wall
+                ball.position.x += (10 - ball.position.x);
             }
             else if (ball.position.y < 10) {
                 wallCollision = true;
 
-                // Set the position outside of the wall
-                ball.position.y += 10 - ball.position.y;
+                // Set the ball position outside of the wall
+                ball.position.y += (10 - ball.position.y);
 
-                if (ball.velocity.x < 0) {
-                    positiveReflection = true;
-                }
-            }
-            else if (ball.position.y > 990) {
-                wallCollision = true;
-
-                // Set the position outside of the wall
-                ball.position.y -= ball.position.y - 990;
-
-                if (ball.velocity.x > 0) {
-                    positiveReflection = true;
-                }
+                yReflection = true;
             }
 
             if (wallCollision) {
-                ball.reflect(positiveReflection);
+                ball.reflect(yReflection);
                 anyWallCollisions = true;
             }
         }
+
         if (anyWallCollisions) {
             return true;
         }
@@ -169,7 +152,7 @@ MyGame.screens['game-play'] = (function(game, input, gameState, renderer) {
     // Returns true if there was a wall collision otherwise returns false
     function handlePaddleCollisions(elapsedTime) {
         let halfPaddleDist = Math.floor(gameState.getPaddleLength() / 2)
-        let paddleCenter = gameState.getPaddleX() - halfPaddleDist;
+        let paddleCenter = gameState.getPaddleX();
         let PADDLE_START_Y = 930;
         let PADDLE_HEIGHT = 20;
 
@@ -177,20 +160,31 @@ MyGame.screens['game-play'] = (function(game, input, gameState, renderer) {
 
         for (let i = 0; i < gameState.balls.length; i++) {
             let ball = gameState.balls[i];
+            let bottomBallY = ball.position.y + ball.sideLength;
 
             let paddleCollision = false;
             let timeToEscape = null;
             
 
-            if ((ball.position.y > PADDLE_START_Y) && (ball.position.y < PADDLE_START_Y + PADDLE_HEIGHT)) {
-                if ((ball.position.x < (paddleCenter + halfPaddleDist)) && (ball.position.x > (paddleCenter - halfPaddleDist))) {
+            if ((bottomBallY > PADDLE_START_Y) && (bottomBallY < (PADDLE_START_Y + PADDLE_HEIGHT))) {
+                if ((ball.position.x < (paddleCenter + halfPaddleDist)) && ((ball.position.x + ball.sideLength) > (paddleCenter - halfPaddleDist))) {
                     paddleCollision = true;
-                    let posZValue = Math.floor((ball.position.x - paddleCenter) / halfPaddleDist);
+
+                    // Set the ball position outside of the wall
+                    ball.position.y -= (PADDLE_START_Y - ball.position.y);
+
+                    let posZValue = (ball.position.x - paddleCenter) / halfPaddleDist;
                     ball.paddleBounce(posZValue);
                 }
             }
         }
-        
+
+        if (anyPaddleCollisions) {
+            return true;
+        }
+        else {
+            return false;
+        }
     }
 
     //
@@ -201,16 +195,26 @@ MyGame.screens['game-play'] = (function(game, input, gameState, renderer) {
     }
 
     //
-    // Updates the position of the balls
-    function updateBallPositions(elapsedTime) {
+    // Updates the position of the balls and paddle
+    function updatePositions(elapsedTime) {
+        let RIGHT_LIMIT = 990;
+        let LEFT_LIMIT = 10;
         let xChange = null;
         let temp = stateChanges.paddleX * gameState.getPaddleVelocity();
         (temp > 0) ? xChange = Math.floor(temp) : xChange = Math.ceil(temp);
         let oldX = gameState.getPaddleX();
         let paddleBuffer = gameState.getPaddleLength() / 2;
-        if (!((paddleBuffer + oldX + xChange) > 990) && !((oldX + xChange - paddleBuffer) < 10)) {
+
+        if ((paddleBuffer + oldX + xChange) > RIGHT_LIMIT) {
+            gameState.setPaddleX(RIGHT_LIMIT - paddleBuffer);
+        }
+        else if ((oldX + xChange - paddleBuffer) < LEFT_LIMIT) {
+            gameState.setPaddleX(LEFT_LIMIT + paddleBuffer);
+        }
+        else {
             gameState.setPaddleX(oldX + xChange);
-        }   
+        }
+
         stateChanges.paddleX = 0;
 
         for (let i = 0; i < gameState.balls.length; i++) {
@@ -226,7 +230,7 @@ MyGame.screens['game-play'] = (function(game, input, gameState, renderer) {
                 handleBrickCollisions(elapsedTime);
             }
         }
-        updateBallPositions(elapsedTime);
+        updatePositions(elapsedTime);
     }
 
     function gameOverUpdate(elapsedTime) {

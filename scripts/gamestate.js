@@ -13,7 +13,7 @@ MyGame.gameState = (function() {
     let paddle = {
         x: 500,
         length: 100,
-        velocity: 1
+        velocity: 0.01
     };
 
     function wipeGameState() {
@@ -49,8 +49,6 @@ MyGame.gameState = (function() {
     function getCountdown() {
         return props.countdown;
     }
-
-   
 
     //
     // Takes a spec with attributes points, x, and y
@@ -104,7 +102,7 @@ MyGame.gameState = (function() {
             let direction = innerVelocity.x / innerVelocity.y;
             let signX = innerVelocity.x > 0 ? 1 : -1;
             let signY = innerVelocity.y > 0 ? 1 : -1;
-            innerVelocity.y = (newMag * newMag / Math.sqrt(direction * direction + 1)) * signY;
+            innerVelocity.y = (newMag / Math.sqrt(direction * direction + 1)) * signY;
             innerVelocity.x = Math.abs(direction * innerVelocity.y) * signX;
         };
 
@@ -126,19 +124,21 @@ MyGame.gameState = (function() {
                 innerVelocity.x += 5;
                 innerVelocity.y += 5;
             },
-            reflect: function(positiveReflection) {
-                let oldX = innerVelocity.x;
-                if (positiveReflection) {
-                    innerVelocity.x = innerVelocity.y;
-                    innerVelocity.y = 0 - oldX;
+            reflect: function(yReflection) {
+                if (yReflection) {
+                    innerVelocity.y = 0 - innerVelocity.y;
                 }
                 else {
-                    innerVelocity.x = 0 - innerVelocity.y;
-                    innerVelocity.y = oldX;
+                    innerVelocity.x = 0 - innerVelocity.x;
                 }
             },
             paddleBounce: function(posZValue) {
-
+                let oldMagnitude = innerVelocity.getMagnitude();
+                let directionY = -1;
+                let directionX = posZValue;
+                innerVelocity.x = directionX;
+                innerVelocity.y = directionY;
+                innerVelocity.setMagnitude(oldMagnitude);
             },
             serve: function() {
                 let signSelector = Math.floor(Math.random() * 2); // will be a 1 or a 0
@@ -150,7 +150,7 @@ MyGame.gameState = (function() {
                 innerVelocity.y = -1; // y initial velocity needs to be negative
 
                 // Set magnitude
-                let initialVelocityMagnitude = 0.5;
+                let initialVelocityMagnitude = 0.3;
                 innerVelocity.setMagnitude(initialVelocityMagnitude);
             }
         }
