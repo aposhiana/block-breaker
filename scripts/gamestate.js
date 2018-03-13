@@ -28,7 +28,8 @@ MyGame.gameState = (function() {
     let paddle = {
         x: 500,
         length: 100,
-        velocity: 0.8
+        velocity: 0.8,
+        visible: true
     };
 
     function decrementPaddleLength() {
@@ -47,6 +48,7 @@ MyGame.gameState = (function() {
 
         paddle.x = 500;
         paddle.length = 100;
+        paddle.visible = true;
     }
 
     function setNewGameProperty(value) {
@@ -69,6 +71,18 @@ MyGame.gameState = (function() {
 
     function getCountdown() {
         return props.countdown;
+    }
+
+    function resetCountdown() {
+        props.countdown = 3;
+    }
+
+    function getExtraPaddleCount() {
+        return props.extraPaddles;
+    }
+
+    function setExtraPaddleCount(value) {
+        props.extraPaddles = value;
     }
 
     //
@@ -212,6 +226,18 @@ MyGame.gameState = (function() {
         return paddle.length;
     }
 
+    function setPaddleLength(value) {
+        paddle.length = value;
+    }
+
+    function getPaddleVisibility() {
+        return paddle.visible;
+    }
+
+    function setPaddleVisibility(value) {
+        paddle.visible = value;
+    }
+
     function getPaddleVelocity() {
         return paddle.velocity;
     }
@@ -220,8 +246,14 @@ MyGame.gameState = (function() {
         getPaddleX: getPaddleX,
         setPaddleX: setPaddleX,
         getPaddleLength: getPaddleLength,
+        setPaddleLength: setPaddleLength,
+        getPaddleVisibility: getPaddleVisibility,
+        setPaddleVisibility: setPaddleVisibility,
         getPaddleVelocity: getPaddleVelocity,
         getCountdown: getCountdown,
+        resetCountdown: resetCountdown,
+        getExtraPaddleCount: getExtraPaddleCount,
+        setExtraPaddleCount: setExtraPaddleCount,
         countdown: countdown,
         makeNewBall: makeNewBall,
         setState: setState,

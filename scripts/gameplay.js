@@ -8,7 +8,8 @@ MyGame.screens['game-play'] = (function(game, input, gameState, renderer) {
         context: null,
         update: countdownUpdate,
         accumulatingSecond: 0,
-        paddleDecrements: 0
+        paddleDecrementsNeeded: 0,
+        paddleShrunk: false
     };
 
     let keyboard = input.Keyboard();
@@ -100,6 +101,10 @@ MyGame.screens['game-play'] = (function(game, input, gameState, renderer) {
             console.log(gameState.getCountdown());
             props.accumulatingSecond = 0;
         }
+    }
+
+    function gameOverUpdate(elapsedTime) {
+        stateChanges.paddleX = 0;
     }
 
     //
@@ -232,7 +237,11 @@ MyGame.screens['game-play'] = (function(game, input, gameState, renderer) {
                     if (brick.visible) {
                         if (ballLeft < brickRight && ballRight > brickLeft) {
                             bricksCollidedWith.push(brick);
-                            anyBrickCollisions = true
+                            anyBrickCollisions = true;
+                            if ((rowIndex === 0) && !props.paddleShrunk) {
+                                props.paddleDecrementsNeeded = 50;
+                                props.paddleShrunk = true;
+                            }
                         }
                     }
                     brickLeft += (BRICK_WIDTH + SPACE);
@@ -320,12 +329,73 @@ MyGame.screens['game-play'] = (function(game, input, gameState, renderer) {
         }
     }
 
+    function shrinkPaddle() {
+        gameState.setPaddleLength(gameState.getPaddleLength() - 1);
+        if (gameState.getPaddleLength() <= 0) {
+            gameState.setPaddleVisibility(false);
+        }
+    }
+
+    function loadNewPaddle() {
+        gameState.setPaddleLength(100);
+        gameState.setPaddleX(500);
+        gameState.setPaddleVisibility(true);
+
+        if (gameState.getExtraPaddleCount() > 0) {
+            gameState.setExtraPaddleCount(gameState.getExtraPaddleCount() - 1);
+        }
+        else {
+            gameState.setPaddleVisibility(false);
+            return false;     
+        }  
+
+        props.paddleShrunk = false;
+        return true;
+    }
+
     function gamePlayUpdate(elapsedTime) {
         if (!handleWallCollisions()) {
             if (!handlePaddleCollisions()) {
                 handleBrickCollisions();
             }
         }
+
+        let allBallsOut = true;
+        let ballsToDelete = [];
+        for (let i = 0; i < gameState.balls.length; i++) {
+            if (gameState.balls[i].position.y < 1000) {
+                allBallsOut = false;
+            }
+            else {
+                ballsToDelete.push(i);
+            }
+        }
+
+        for (let i = 0; i < ballsToDelete.length; i++) {
+            gameState.balls.splice(ballsToDelete[i], 1);
+        }
+
+
+        for (let i = 0; i < props.paddleDecrementsNeeded; i++) {
+            shrinkPaddle();
+            props.paddleDecrementsNeeded--;
+        }
+
+        if (allBallsOut) {
+            if (loadNewPaddle()) {
+                props.update = countdownUpdate;
+                gameState.setState('countdown');
+                gameState.resetCountdown();
+
+                // This must be done after loadNewPaddle so that the ball is made on the new paddle
+                gameState.makeNewBall();
+            }
+            else {
+                props.update = gameOverUpdate;
+
+            }
+        }
+
         updatePositions(elapsedTime);
     }
 

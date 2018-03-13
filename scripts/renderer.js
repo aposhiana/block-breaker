@@ -23,6 +23,27 @@ MyGame.renderer = (function(gameState) {
         context.lineTo(995, 1000);
         context.stroke();
 
+        // Draw extra paddles
+        let EXTRA_PADDLE_Y = 980;
+        let EXTRA_PADDLE_WIDTH = 15;
+        let EXTRA_PADDLE_HEIGHT = 10;
+        let extraPaddleX = 20;
+
+        for (let i = 0; i < gameState.getExtraPaddleCount(); i++) {
+            context.beginPath();
+            context.strokeStyle = '#FFFFFF';
+            context.lineWidth = 1;
+            context.moveTo(extraPaddleX, EXTRA_PADDLE_Y);
+            context.lineTo(extraPaddleX + EXTRA_PADDLE_WIDTH, EXTRA_PADDLE_Y);
+            context.lineTo(extraPaddleX + EXTRA_PADDLE_WIDTH, EXTRA_PADDLE_Y + EXTRA_PADDLE_HEIGHT);
+            context.lineTo(extraPaddleX, EXTRA_PADDLE_Y + EXTRA_PADDLE_HEIGHT);
+            context.closePath();
+            context.fillStyle = '#FFFFFF';
+            context.fill();
+            context.stroke();
+            extraPaddleX += EXTRA_PADDLE_WIDTH + 10;
+        }
+
         // Draw bricks
         let BRICK_WIDTH = 65;
         let BRICK_HEIGHT = 30;
@@ -53,22 +74,24 @@ MyGame.renderer = (function(gameState) {
         }
         
         // Draw paddle
-        let PADDLE_START_Y = 930;
-        let PADDLE_HEIGHT = 20;
-        let paddleLen = gameState.getPaddleLength();
-        let startPaddle = gameState.getPaddleX() - (paddleLen / 2);
-        context.beginPath();
-        context.strokeStyle = '#FFFFFF';
-        context.lineWidth = 1;
-        context.moveTo(startPaddle, PADDLE_START_Y);
-        context.lineTo(startPaddle + paddleLen, PADDLE_START_Y);
-        context.lineTo(startPaddle + paddleLen, PADDLE_START_Y + PADDLE_HEIGHT);
-        context.lineTo(startPaddle, PADDLE_START_Y + PADDLE_HEIGHT);
-        context.closePath();
-        context.fillStyle = '#FFFFFF';
-        context.fill();
-        context.stroke();
-
+        if (gameState.getPaddleVisibility()) {
+            let PADDLE_START_Y = 930;
+            let PADDLE_HEIGHT = 20;
+            let paddleLen = gameState.getPaddleLength();
+            let startPaddle = gameState.getPaddleX() - (paddleLen / 2);
+            context.beginPath();
+            context.strokeStyle = '#FFFFFF';
+            context.lineWidth = 1;
+            context.moveTo(startPaddle, PADDLE_START_Y);
+            context.lineTo(startPaddle + paddleLen, PADDLE_START_Y);
+            context.lineTo(startPaddle + paddleLen, PADDLE_START_Y + PADDLE_HEIGHT);
+            context.lineTo(startPaddle, PADDLE_START_Y + PADDLE_HEIGHT);
+            context.closePath();
+            context.fillStyle = '#FFFFFF';
+            context.fill();
+            context.stroke();
+        }
+        
         // Draw balls
         for (let i = 0; i < gameState.balls.length; i++) {
             let topLeftBallX = gameState.balls[i].position.x;
