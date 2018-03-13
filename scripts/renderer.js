@@ -34,6 +34,9 @@ MyGame.renderer = (function(gameState) {
         ];
         for (let row = 0; row < gameState.bricks.length; row++) {
             for (let col = 0; col < gameState.bricks[row].length; col++) {
+                if (!gameState.bricks[row][col].visible) {
+                    continue;
+                }
                 let brickPos = gameState.bricks[row][col].position;
                 context.beginPath();
                 context.strokeStyle = brickColors[row];

@@ -69,14 +69,16 @@ MyGame.gameState = (function() {
         let NUM_COLS = 14;
         let BRICK_WIDTH = 65;
         let BRICK_HEIGHT = 30;
-        let pointsPerBrickByRow = [1, 2, 3, 5, 25];
         let SPACE = 5;
+        let FIRST_BRICKS_X_OFFSET = SPACE + 7;
+
+        let pointsPerBrickByRow = [1, 2, 3, 5, 25];
 
         let rowHeight = 200; // Set to height of first row
         for (let row = 0; row < NUM_ROWS; row++) {
             let row = [];
         
-            let colX = SPACE + 7; // Set to the x offset of first bricks in a row
+            let colX = FIRST_BRICKS_X_OFFSET;
             for (let col = 0; col < NUM_COLS; col++) {
                 let spec = {
                     points: pointsPerBrickByRow[row],
