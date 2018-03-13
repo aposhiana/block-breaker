@@ -7,14 +7,33 @@ MyGame.gameState = (function() {
     let props = {
         countdown: 3,
         state: 'countdown',
-        newGame: true
+        newGame: true,
+        numBricksRemoved: 0,
+        initialBallVelocityMagnitude: 0.3,
+        extraPaddles: 2
     };
+
+    function upInitialBallVelocityMagnitude() {
+        props.initialBallVelocityMagnitude += 0.1 * 1.4142136;
+    }
+
+    function getNumBricksRemoved() {
+        return props.numBricksRemoved;
+    }
+
+    function setNumBricksRemoved(value) {
+        props.numBricksRemoved = value;
+    }
 
     let paddle = {
         x: 500,
         length: 100,
-        velocity: 0.01
+        velocity: 0.8
     };
+
+    function decrementPaddleLength() {
+        paddle.length--;
+    }
 
     function wipeGameState() {
         balls.splice(0, balls.length);
@@ -22,10 +41,12 @@ MyGame.gameState = (function() {
 
         props.countdown = 3;
         props.state = 'countdown';
+        props.initialBallVelocityMagnitude = 0.3;
+        props.numBricksRemoved = 0;
+        props.extraPaddles = 2;
 
         paddle.x = 500;
         paddle.length = 100;
-        paddle.velocity = 1;
     }
 
     function setNewGameProperty(value) {
@@ -123,8 +144,19 @@ MyGame.gameState = (function() {
                 get y() { return innerVelocity.y; }
             },
             increaseVelocity: function() {
-                innerVelocity.x += 5;
-                innerVelocity.y += 5;
+                if (innerVelocity.x > 0) {
+                    innerVelocity.x += 0.1;
+                }
+                else {
+                    innerVelocity.x -= 0.1;
+                }
+
+                if (innerVelocity.y > 0) {
+                    innerVelocity.y += 0.1;
+                }
+                else {
+                    innerVelocity.y -= 0.1;
+                }
             },
             reflect: function(yReflection) {
                 if (yReflection) {
@@ -152,8 +184,7 @@ MyGame.gameState = (function() {
                 innerVelocity.y = -1; // y initial velocity needs to be negative
 
                 // Set magnitude
-                let initialVelocityMagnitude = 0.3;
-                innerVelocity.setMagnitude(initialVelocityMagnitude);
+                innerVelocity.setMagnitude(props.initialBallVelocityMagnitude);
             }
         }
 
@@ -199,6 +230,9 @@ MyGame.gameState = (function() {
         initializeBricks: initializeBricks,
         wipeGameState: wipeGameState,
         setNewGameProperty: setNewGameProperty,
-        getNewGameProperty: getNewGameProperty
+        getNewGameProperty: getNewGameProperty,
+        getNumBricksRemoved: getNumBricksRemoved,
+        setNumBricksRemoved: setNumBricksRemoved,
+        upInitialBallVelocityMagnitude: upInitialBallVelocityMagnitude
     };
 }());

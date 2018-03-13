@@ -7,7 +7,8 @@ MyGame.screens['game-play'] = (function(game, input, gameState, renderer) {
         canvas: null,
         context: null,
         update: countdownUpdate,
-        accumulatingSecond: 0
+        accumulatingSecond: 0,
+        paddleDecrements: 0
     };
 
     let keyboard = input.Keyboard();
@@ -269,6 +270,16 @@ MyGame.screens['game-play'] = (function(game, input, gameState, renderer) {
 
                 // Perform other necessary actions for brick collision
                 brick.visible = false;
+
+                gameState.setNumBricksRemoved(gameState.getNumBricksRemoved() + 1);
+
+                let increasePoints = [4, 12, 36, 62];
+                if (increasePoints.includes(gameState.getNumBricksRemoved())) {
+                    for (let ballI = 0; ballI < gameState.balls.length; ballI++) {
+                        gameState.balls[ballI].increaseVelocity();
+                    }
+                    gameState.upInitialBallVelocityMagnitude();
+                }
             }
         }
         if (anyBrickCollisions) {
