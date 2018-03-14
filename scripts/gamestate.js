@@ -4,6 +4,8 @@ MyGame.gameState = (function() {
     let balls = [];
     let bricks = [];
 
+    let particleSystems = [];
+
     let props = {
         countdown: 3,
         state: 'countdown',
@@ -324,6 +326,7 @@ MyGame.gameState = (function() {
         getPaddleDecrementsNeeded: getPaddleDecrementsNeeded,
         setPaddleDecrementsNeeded: setPaddleDecrementsNeeded,
         getExtraBallAtX100: getExtraBallAtX100,
-        setExtraBallAtX100: setExtraBallAtX100
+        setExtraBallAtX100: setExtraBallAtX100,
+        particleSystems: particleSystems
     };
 }());

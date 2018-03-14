@@ -26,10 +26,10 @@ MyGame.screens['game-play'] = (function(game, input, gameState, renderer) {
         }
 
 
-        // From https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/sort
+        // Source for this function: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/sort
         function compareNumbers(a, b) {
             return a - b;
-          }
+        }
 
         highScores.push(myScore);
         highScores.sort(compareNumbers);
@@ -315,6 +315,24 @@ MyGame.screens['game-play'] = (function(game, input, gameState, renderer) {
                 // Perform other necessary actions for brick collision
                 brick.visible = false;
 
+                // Add a particle system
+                let ps = ParticleSystem({
+                    position: { 
+                        xMax: brick.position.x + BRICK_WIDTH,
+                        xMin: brick.position.x,
+                        yMax: brick.position.y + BRICK_HEIGHT,
+                        yMin: brick.position.y
+                    },
+                    speed: { mean: 0.07, stdev: 0.025},
+                    lifetime: { mean: 2000, stdev: 1000 },
+                    size: { mean: 5, stdev: 2 },
+                    fill: 'rgba(0, 0, 255, 0.5)',
+                    image: 'textures/smoke.png'
+                }, MyGame.graphics, props.context);
+                
+                ps.initiate();
+                gameState.particleSystems.push(ps);
+
                 gameState.setNumBricksRemoved(gameState.getNumBricksRemoved() + 1);
 
                 let increasePoints = [4, 12, 36, 62];
@@ -440,7 +458,7 @@ MyGame.screens['game-play'] = (function(game, input, gameState, renderer) {
     }
 
     function render(elapsedTime) {
-        renderer.render(props.context);
+        renderer.render(props.context, elapsedTime);
     }
 
     function gameLoop(time) {

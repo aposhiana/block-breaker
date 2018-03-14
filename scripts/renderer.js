@@ -6,7 +6,7 @@ MyGame.renderer = (function(gameState) {
         backgroundImg: 'images/mountain-clouds.jpg'
     };
 
-    function render(context) {
+    function render(context, elapsedTime) {
         context.clear();
 
         if (images.backgroundImg.isReady) {
@@ -136,7 +136,13 @@ MyGame.renderer = (function(gameState) {
             context.font = '42px sans-serif';
             halfTextWidth = context.measureText('press ESC to exit').width / 2;
             context.fillText('press ESC to exit', 500 - halfTextWidth, 620);
-        }  
+        }
+
+        // Render particles
+        for (let i = 0; i < gameState.particleSystems.length; i++) {
+            gameState.particleSystems[i].update(elapsedTime);
+            gameState.particleSystems[i].render();
+        }
     }
 
     return {
