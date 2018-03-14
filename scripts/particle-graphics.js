@@ -1,3 +1,4 @@
+// THIS CODE WAS ADAPTED FROM DR. MATHIAS'S EXAMPLE CODE
 MyGame.graphics = (function() {
     function drawImage(context, center, size, rotation, image) {
         context.save();

@@ -26,9 +26,9 @@
 <body onload="MyGame.game.initialize()">
     <div id="main-menu" class="screen">
         <div class="container">
-            <button onclick="MyGame.game.showScreen('game-play')">New Game</button>
-            <button onclick="MyGame.game.showScreen('high-scores')">High Scores</button>
-            <button onclick="MyGame.game.showScreen('credits')">Credits</button>
+            <button id="mm-new" onclick="MyGame.game.showScreen('game-play')">New Game</button>
+            <button id="mm-high" onclick="MyGame.game.showScreen('high-scores')">High Scores</button>
+            <button id="mm-credits" onclick="MyGame.game.showScreen('credits')">Credits</button>
         </div>
     </div>
     <div id="game-play" class="screen">
@@ -36,8 +36,8 @@
     </div>
     <div id="high-scores" class="screen">
         <h3>High Scores</h3>
-        <button id="high-scores-back">Back</button>
         <ol id="ol-scores"></ol>
+        <button id="high-scores-back">Back</button>
     </div>
     <div id="credits" class="screen">
         <h3>Credits</h3>
@@ -46,8 +46,10 @@
     </div>
     <div id="paused-menu" class="screen">
             <h3>Game Paused</h3>
-            <button id="button-resume">Resume</button>
-            <button id="button-quit-game">Quit Game</button>
+            <div class="container"></div>
+                <button id="button-resume">Resume</button>
+                <button id="button-quit-game">Quit Game</button>
+            </div>
         </div>
 </body>
 </html>

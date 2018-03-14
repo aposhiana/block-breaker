@@ -2,6 +2,25 @@
     display: none;
 }
 
+button {
+    background-color: #2b2b2b;
+    border: none;
+    color: white;
+    padding: 10px 22px;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    font-size: 12px;
+    margin: 4px 2px;
+    cursor: pointer;
+}
+
+body {
+    background-color: darkslategrey;
+    color: white;
+    font-family: sans-serif;
+}
+
 .screen.active {
     display: block;
 }
