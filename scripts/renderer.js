@@ -25,20 +25,20 @@ MyGame.renderer = (function(gameState) {
 
         // Draw extra paddles
         let EXTRA_PADDLE_Y = 980;
-        let EXTRA_PADDLE_WIDTH = 15;
+        let EXTRA_PADDLE_WIDTH = 20;
         let EXTRA_PADDLE_HEIGHT = 10;
         let extraPaddleX = 20;
 
         for (let i = 0; i < gameState.getExtraPaddleCount(); i++) {
             context.beginPath();
-            context.strokeStyle = '#FFFFFF';
+            context.strokeStyle = 'lightgrey';
             context.lineWidth = 1;
             context.moveTo(extraPaddleX, EXTRA_PADDLE_Y);
             context.lineTo(extraPaddleX + EXTRA_PADDLE_WIDTH, EXTRA_PADDLE_Y);
             context.lineTo(extraPaddleX + EXTRA_PADDLE_WIDTH, EXTRA_PADDLE_Y + EXTRA_PADDLE_HEIGHT);
             context.lineTo(extraPaddleX, EXTRA_PADDLE_Y + EXTRA_PADDLE_HEIGHT);
             context.closePath();
-            context.fillStyle = '#FFFFFF';
+            context.fillStyle = 'lightgrey';
             context.fill();
             context.stroke();
             extraPaddleX += EXTRA_PADDLE_WIDTH + 10;
@@ -110,6 +110,33 @@ MyGame.renderer = (function(gameState) {
             context.fill();
             context.stroke();
         }
+
+        // Render score
+        context.font = '20px sans-serif';
+        context.fillStyle = '#ccff15';
+        context.fillText('Score: ' + gameState.getScore(), 880, 985);
+
+        // Render countdown if in countdown
+        if (gameState.getState() === 'countdown') {
+            let countValue = gameState.getCountdown();
+            if (countValue > 0) {
+                context.font = '200px sans-serif';
+                context.fillStyle = 'black';
+                let halfTextWidth = context.measureText(countValue).width / 2;
+                context.fillText(countValue, 500 - halfTextWidth, 560);
+            }  
+        }
+
+        // Render GAME OVER if in gameover
+        if (gameState.getState() === 'gameover') {
+            context.font = '120px sans-serif';
+            context.fillStyle = 'black';
+            let halfTextWidth = context.measureText('GAME OVER').width / 2;
+            context.fillText('GAME OVER', 500 - halfTextWidth, 550);
+            context.font = '42px sans-serif';
+            halfTextWidth = context.measureText('press ESC to exit').width / 2;
+            context.fillText('press ESC to exit', 500 - halfTextWidth, 620);
+        }  
     }
 
     return {

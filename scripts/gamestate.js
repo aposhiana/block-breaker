@@ -10,8 +10,45 @@ MyGame.gameState = (function() {
         newGame: true,
         numBricksRemoved: 0,
         initialBallVelocityMagnitude: 0.3,
-        extraPaddles: 2
+        extraPaddles: 2,
+        score: 0,
+        paddleDecrementsNeeded: 0,
+        paddleShrunk: false,
+        extraBallAtX100: 0,
+        bricksBrokenByRow: [0, 0, 0, 0, 0, 0, 0, 0]
     };
+
+    function getExtraBallAtX100() {
+        return props.extraBallAtX100;
+    }
+
+    function setExtraBallAtX100(value) {
+        props.extraBallAtX100 = value;
+    }
+
+    function getPaddleShrunk() {
+        return props.paddleShrunk;
+    }
+
+    function setPaddleShrunk(value) {
+        props.paddleShrunk = value;
+    }
+
+    function getPaddleDecrementsNeeded() {
+        return props.paddleDecrementsNeeded;
+    }
+
+    function setPaddleDecrementsNeeded(value) {
+        props.paddleDecrementsNeeded = value;
+    }
+
+    function addToScore(value) {
+        props.score += value;
+    }
+
+    function getScore() {
+        return props.score;
+    }
 
     function upInitialBallVelocityMagnitude() {
         props.initialBallVelocityMagnitude += 0.1 * 1.4142136;
@@ -40,11 +77,19 @@ MyGame.gameState = (function() {
         balls.splice(0, balls.length);
         bricks.splice(0, bricks.length);
 
+        for (let i = 0; i < props.bricksBrokenByRow.length; i++) {
+            props.bricksBrokenByRow[i] = 0;
+        }
+
         props.countdown = 3;
         props.state = 'countdown';
         props.initialBallVelocityMagnitude = 0.3;
         props.numBricksRemoved = 0;
         props.extraPaddles = 2;
+        props.score = 0;
+        props.paddleShrunk = false;
+        props.paddleDecrementsNeeded = 0;
+        props.extraBallAtX100 = 0;
 
         paddle.x = 500;
         paddle.length = 100;
@@ -57,6 +102,10 @@ MyGame.gameState = (function() {
 
     function getNewGameProperty() {
         return props.newGame;
+    }
+
+    function getState() {
+        return props.state;
     }
 
     function setState(state) {
@@ -107,16 +156,16 @@ MyGame.gameState = (function() {
         let SPACE = 5;
         let FIRST_BRICKS_X_OFFSET = SPACE + 7;
 
-        let pointsPerBrickByRow = [1, 2, 3, 5, 25];
+        let pointsPerBrickByRow = [5, 5, 3, 3, 2, 2, 1, 1];
 
         let rowHeight = 200; // Set to height of first row
-        for (let row = 0; row < NUM_ROWS; row++) {
+        for (let rowIndex = 0; rowIndex < NUM_ROWS; rowIndex++) {
             let row = [];
         
             let colX = FIRST_BRICKS_X_OFFSET;
             for (let col = 0; col < NUM_COLS; col++) {
                 let spec = {
-                    points: pointsPerBrickByRow[row],
+                    points: pointsPerBrickByRow[rowIndex],
                     x: colX,
                     y: rowHeight
                 }
@@ -256,6 +305,7 @@ MyGame.gameState = (function() {
         setExtraPaddleCount: setExtraPaddleCount,
         countdown: countdown,
         makeNewBall: makeNewBall,
+        getState: getState,
         setState: setState,
         balls: balls,
         bricks: bricks,
@@ -265,6 +315,15 @@ MyGame.gameState = (function() {
         getNewGameProperty: getNewGameProperty,
         getNumBricksRemoved: getNumBricksRemoved,
         setNumBricksRemoved: setNumBricksRemoved,
-        upInitialBallVelocityMagnitude: upInitialBallVelocityMagnitude
+        upInitialBallVelocityMagnitude: upInitialBallVelocityMagnitude,
+        addToScore: addToScore,
+        getScore: getScore,
+        bricksBrokenByRow: props.bricksBrokenByRow,
+        getPaddleShrunk: getPaddleShrunk,
+        setPaddleShrunk: setPaddleShrunk,
+        getPaddleDecrementsNeeded: getPaddleDecrementsNeeded,
+        setPaddleDecrementsNeeded: setPaddleDecrementsNeeded,
+        getExtraBallAtX100: getExtraBallAtX100,
+        setExtraBallAtX100: setExtraBallAtX100
     };
 }());

@@ -27,6 +27,22 @@ MyGame.screens['high-scores'] = (function(game) {
     }
 
     function signalLoop(time) {
+        let highScores = localStorage.getItem('highScores');
+
+        if (highScores !== null) {
+            highScores = JSON.parse(highScores);
+        }
+        else {
+            highScores = [];
+        }
+
+        let htmlNode = document.getElementById('ol-scores');
+
+        htmlNode.innerHTML = '';
+        for (let i = 0; i < highScores.length; i++) {
+			htmlNode.innerHTML += ('<li>' + highScores[i] + '</li>'); 
+        }
+
         keyboard.handleEvents(time - props.lastTimeStamp);
         props.lastTimeStamp = time;
         if (!props.cancelNextRequest) {

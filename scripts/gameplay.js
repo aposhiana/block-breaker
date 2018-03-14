@@ -8,15 +8,39 @@ MyGame.screens['game-play'] = (function(game, input, gameState, renderer) {
         context: null,
         update: countdownUpdate,
         accumulatingSecond: 0,
-        paddleDecrementsNeeded: 0,
-        paddleShrunk: false
     };
 
     let keyboard = input.Keyboard();
 
     let stateChanges = {
-        paddleX: 0,
+        paddleX: 0
     };
+
+    function updateHighScores(myScore) {
+        let highScores = localStorage.getItem('highScores');
+        if (highScores !== null) {
+            highScores = JSON.parse(highScores);
+        }
+        else {
+            highScores = [];
+        }
+
+
+        // From https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/sort
+        function compareNumbers(a, b) {
+            return a - b;
+          }
+
+        highScores.push(myScore);
+        highScores.sort(compareNumbers);
+        highScores.reverse();
+
+        for (let i = 5; i < highScores.length; i++) {
+            highScores.pop();
+        }
+
+        localStorage['highScores'] = JSON.stringify(highScores);
+    }
 
     function startNewGame() {
         props.cancelNextRequest = false;
@@ -238,9 +262,20 @@ MyGame.screens['game-play'] = (function(game, input, gameState, renderer) {
                         if (ballLeft < brickRight && ballRight > brickLeft) {
                             bricksCollidedWith.push(brick);
                             anyBrickCollisions = true;
-                            if ((rowIndex === 0) && !props.paddleShrunk) {
-                                props.paddleDecrementsNeeded = 50;
-                                props.paddleShrunk = true;
+                            if ((rowIndex === 0) && !gameState.getPaddleShrunk()) {
+                                gameState.setPaddleDecrementsNeeded(50);
+                                gameState.setPaddleShrunk(true);
+                            }
+                            gameState.bricksBrokenByRow[rowIndex]++;
+                            gameState.addToScore(brick.points);
+                            if (gameState.bricksBrokenByRow[rowIndex] === 14) {
+                                gameState.addToScore(25);
+                            }
+
+                            if (Math.floor(gameState.getScore() / 100) > gameState.getExtraBallAtX100()) {
+                                gameState.setExtraBallAtX100(gameState.getExtraBallAtX100() + 1);
+                                gameState.makeNewBall();
+                                gameState.balls[gameState.balls.length - 1].serve();
                             }
                         }
                     }
@@ -349,7 +384,7 @@ MyGame.screens['game-play'] = (function(game, input, gameState, renderer) {
             return false;     
         }  
 
-        props.paddleShrunk = false;
+        gameState.setPaddleShrunk(false);
         return true;
     }
 
@@ -376,9 +411,9 @@ MyGame.screens['game-play'] = (function(game, input, gameState, renderer) {
         }
 
 
-        for (let i = 0; i < props.paddleDecrementsNeeded; i++) {
+        for (let i = 0; i < gameState.getPaddleDecrementsNeeded(); i++) {
             shrinkPaddle();
-            props.paddleDecrementsNeeded--;
+            gameState.setPaddleDecrementsNeeded(gameState.getPaddleDecrementsNeeded() - 1);
         }
 
         if (allBallsOut) {
@@ -392,7 +427,8 @@ MyGame.screens['game-play'] = (function(game, input, gameState, renderer) {
             }
             else {
                 props.update = gameOverUpdate;
-
+                gameState.setState('gameover');
+                updateHighScores(gameState.getScore());
             }
         }
 
