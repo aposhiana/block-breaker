@@ -1,6 +1,7 @@
 MyGame.gameState = (function() {
     'use strict';
 
+    let START_INITIAL_BALL_VELOCITY_MAG = 0.3;
     let balls = [];
     let bricks = [];
 
@@ -11,7 +12,7 @@ MyGame.gameState = (function() {
         state: 'countdown',
         newGame: true,
         numBricksRemoved: 0,
-        initialBallVelocityMagnitude: 0.3,
+        initialBallVelocityMagnitude: START_INITIAL_BALL_VELOCITY_MAG,
         extraPaddles: 2,
         score: 0,
         paddleDecrementsNeeded: 0,
@@ -85,7 +86,7 @@ MyGame.gameState = (function() {
 
         props.countdown = 3;
         props.state = 'countdown';
-        props.initialBallVelocityMagnitude = 0.3;
+        props.initialBallVelocityMagnitude = START_INITIAL_BALL_VELOCITY_MAG;
         props.numBricksRemoved = 0;
         props.extraPaddles = 2;
         props.score = 0;
@@ -233,10 +234,8 @@ MyGame.gameState = (function() {
             },
             paddleBounce: function(posZValue) {
                 let oldMagnitude = innerVelocity.getMagnitude();
-                let directionY = -1;
-                let directionX = posZValue;
-                innerVelocity.x = directionX;
-                innerVelocity.y = directionY;
+                innerVelocity.x = posZValue;
+                innerVelocity.y = -1;
                 innerVelocity.setMagnitude(oldMagnitude);
             },
             serve: function() {

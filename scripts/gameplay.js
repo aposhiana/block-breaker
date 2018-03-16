@@ -1,6 +1,8 @@
 MyGame.screens['game-play'] = (function(game, input, gameState, renderer) {
     'use strict';
 
+    let START_PADDLE_CENTER = 500;
+
     let props = {
         lastTimeStamp: null,
         cancelNextRequest: false,
@@ -9,6 +11,13 @@ MyGame.screens['game-play'] = (function(game, input, gameState, renderer) {
         update: countdownUpdate,
         accumulatingSecond: 0,
     };
+
+    let particleImages = [
+        'greenlight.png', 'greenlight.png',
+        'bluelight.png', 'bluelight.png',
+        'orangelight.png', 'orangelight.png',
+        'yellowlight.png', 'yellowlight.png'
+    ];
 
     let keyboard = input.Keyboard();
 
@@ -110,6 +119,7 @@ MyGame.screens['game-play'] = (function(game, input, gameState, renderer) {
     }
 
     function countdownUpdate(elapsedTime) {
+        gameState.setPaddleX(START_PADDLE_CENTER);
         stateChanges.paddleX = 0;
         props.accumulatingSecond += elapsedTime;
 
@@ -184,26 +194,26 @@ MyGame.screens['game-play'] = (function(game, input, gameState, renderer) {
         let halfPaddleDist = Math.floor(gameState.getPaddleLength() / 2)
         let paddleCenter = gameState.getPaddleX();
         let PADDLE_START_Y = 930;
-        let PADDLE_HEIGHT = 20;
+        let PADDLE_HEIGHT = 25;
 
         let anyPaddleCollisions = false;
 
         for (let i = 0; i < gameState.balls.length; i++) {
             let ball = gameState.balls[i];
-            let bottomBallY = ball.position.y + ball.sideLength;
+            let ballBottom = ball.position.y + ball.sideLength;
 
             let paddleCollision = false;
             let timeToEscape = null;
             
 
-            if ((bottomBallY > PADDLE_START_Y) && (bottomBallY < (PADDLE_START_Y + PADDLE_HEIGHT))) {
+            if ((ballBottom > PADDLE_START_Y) && (ballBottom < (PADDLE_START_Y + PADDLE_HEIGHT))) {
                 if ((ball.position.x < (paddleCenter + halfPaddleDist)) && ((ball.position.x + ball.sideLength) > (paddleCenter - halfPaddleDist))) {
                     paddleCollision = true;
 
                     // Set the ball position outside of the wall
-                    ball.position.y -= (PADDLE_START_Y - ball.position.y);
+                    ball.position.y -= (ball.position.y + ball.sideLength - PADDLE_START_Y);
 
-                    let posZValue = (ball.position.x - paddleCenter) / halfPaddleDist;
+                    let posZValue = (ball.position.x + (ball.sideLength / 2) - paddleCenter) / halfPaddleDist;
                     ball.paddleBounce(posZValue);
                 }
             }
@@ -229,8 +239,8 @@ MyGame.screens['game-play'] = (function(game, input, gameState, renderer) {
 
         for (let ballIndex = 0; ballIndex < gameState.balls.length; ballIndex++) {
             let ball = gameState.balls[ballIndex];
-            let topBallY = ball.position.y;
-            let bottomBallY = topBallY + ball.sideLength;
+            let ballTop = ball.position.y;
+            let ballBottom = ballTop + ball.sideLength;
 
 
             // Find the rows that the ball intersects with
@@ -238,7 +248,7 @@ MyGame.screens['game-play'] = (function(game, input, gameState, renderer) {
             let rowTop = 200; // Initialize to top of first row
             let rowBottom = rowTop + BRICK_HEIGHT;
             for (let i = 0; i < gameState.bricks.length; i++) {
-                if (topBallY < rowBottom && bottomBallY > rowTop) {
+                if (ballTop < rowBottom && ballBottom > rowTop) {
                     rowsToCheck.push(i);
                 }
                 rowTop += (BRICK_HEIGHT + SPACE);
@@ -260,7 +270,26 @@ MyGame.screens['game-play'] = (function(game, input, gameState, renderer) {
                     let brick = gameState.bricks[rowIndex][j];
                     if (brick.visible) {
                         if (ballLeft < brickRight && ballRight > brickLeft) {
-                            bricksCollidedWith.push(brick);
+
+                            let crossingCorner = {};
+                            if (ballRight > brickRight) {
+                                crossingCorner.x = ballLeft;
+                            }
+                            else {
+                                crossingCorner.x = ballRight;
+                            }
+                            if (ballBottom > rowBottom) {
+                                crossingCorner.y = ballTop;
+                            }
+                            else {
+                                crossingCorner.y = ballBottom;
+                            }
+
+                            bricksCollidedWith.push({ 
+                                brickCrossed: brick,
+                                crossingBallCorner: crossingCorner
+                            });
+
                             anyBrickCollisions = true;
                             if ((rowIndex === 0) && !gameState.getPaddleShrunk()) {
                                 gameState.setPaddleDecrementsNeeded(50);
@@ -277,6 +306,37 @@ MyGame.screens['game-play'] = (function(game, input, gameState, renderer) {
                                 gameState.makeNewBall();
                                 gameState.balls[gameState.balls.length - 1].serve();
                             }
+
+                            // Perform other necessary actions for brick collision
+                            brick.visible = false;
+
+                            // Add a particle system
+                            let ps = ParticleSystem({
+                                position: { 
+                                    xMax: brick.position.x + BRICK_WIDTH,
+                                    xMin: brick.position.x,
+                                    yMax: brick.position.y + BRICK_HEIGHT,
+                                    yMin: brick.position.y
+                                },
+                                speed: { mean: 0.15, stdev: 0.05},
+                                lifetime: { mean: 200, stdev: 200 },
+                                size: { mean: 7, stdev: 2 },
+                                fill: 'rgba(0, 0, 255, 0.5)',
+                                image: 'textures/' + particleImages[rowIndex]
+                            }, MyGame.graphics, props.context);
+                
+                            ps.initiate();
+                            gameState.particleSystems.push(ps);
+
+                            gameState.setNumBricksRemoved(gameState.getNumBricksRemoved() + 1);
+
+                            let increasePoints = [4, 12, 36, 62];
+                            if (increasePoints.includes(gameState.getNumBricksRemoved())) {
+                                for (let ballI = 0; ballI < gameState.balls.length; ballI++) {
+                                    gameState.balls[ballI].increaseVelocity();
+                                }
+                                gameState.upInitialBallVelocityMagnitude();
+                            }
                         }
                     }
                     brickLeft += (BRICK_WIDTH + SPACE);
@@ -284,64 +344,63 @@ MyGame.screens['game-play'] = (function(game, input, gameState, renderer) {
                 }
             }
 
+            let reflections = [];
+
             // Handle the collisions
             for (let i = 0; i < bricksCollidedWith.length; i++) {
-                let brick = bricksCollidedWith[i];
+                let brick = bricksCollidedWith[i].brickCrossed;
+                let crossingBallPos = bricksCollidedWith[i].crossingBallCorner;
 
-                // Only perform the reflection on the first brick collided with
-                if (i === 0) {
-                    let yLine = null;
+                let yLine = null;
+                let xLine = null;
 
-                    if (ball.velocity.y < 0) {
-                        yLine = brick.position.y + BRICK_HEIGHT;
-                    }
-                    else {
-                        yLine = brick.position.y;
-                    }
-
-                    // Use point-slope line formula to calculate intersection
-                    let trajectorySlope = ball.velocity.y / ball.velocity.x;
-                    let yLineCross = ((yLine - ball.position.y) / trajectorySlope) + ball.position.x;
-
-                    // Test if intersection is in the brick wall, if not then it came through the perpendicular wall
-                    if ((yLineCross >= brick.position.x) && (yLineCross <= (brick.position.x + BRICK_WIDTH))) {
-                        ball.reflect(true);
-                    }
-                    else {
-                        ball.reflect(false);
-                    }
+                if (ball.velocity.y < 0) {
+                    yLine = brick.position.y + BRICK_HEIGHT;
+                }
+                else {
+                    yLine = brick.position.y;
                 }
 
-                // Perform other necessary actions for brick collision
-                brick.visible = false;
-
-                // Add a particle system
-                let ps = ParticleSystem({
-                    position: { 
-                        xMax: brick.position.x + BRICK_WIDTH,
-                        xMin: brick.position.x,
-                        yMax: brick.position.y + BRICK_HEIGHT,
-                        yMin: brick.position.y
-                    },
-                    speed: { mean: 0.07, stdev: 0.025},
-                    lifetime: { mean: 2000, stdev: 1000 },
-                    size: { mean: 5, stdev: 2 },
-                    fill: 'rgba(0, 0, 255, 0.5)',
-                    image: 'textures/smoke.png'
-                }, MyGame.graphics, props.context);
-                
-                ps.initiate();
-                gameState.particleSystems.push(ps);
-
-                gameState.setNumBricksRemoved(gameState.getNumBricksRemoved() + 1);
-
-                let increasePoints = [4, 12, 36, 62];
-                if (increasePoints.includes(gameState.getNumBricksRemoved())) {
-                    for (let ballI = 0; ballI < gameState.balls.length; ballI++) {
-                        gameState.balls[ballI].increaseVelocity();
-                    }
-                    gameState.upInitialBallVelocityMagnitude();
+                if (ball.velocity.x < 0) {
+                    xLine = brick.position.x + BRICK_WIDTH;
                 }
+                else {
+                    xLine = brick.position.x;
+                }
+
+                // Use point-slope line formula to calculate intersection
+                let trajectorySlope = ball.velocity.y / ball.velocity.x;
+                let yLineCross = ((yLine - crossingBallPos.y) / trajectorySlope) + crossingBallPos.x;
+
+                // Test if intersection is in the brick wall, if not then it came through the perpendicular wall
+                if ((yLineCross >= brick.position.x) && (yLineCross <= (brick.position.x + BRICK_WIDTH))) {
+                    let distanceOverVelocity = Math.abs((yLine - crossingBallPos.y) / ball.velocity.y);
+                    reflections.push({
+                        yReflect: true,
+                        distanceOverVelocity: distanceOverVelocity
+                    });
+                }
+                else {
+                    let distanceOverVelocity = Math.abs((xLine - crossingBallPos.x) / ball.velocity.x);
+                    reflections.push({
+                        yReflect: false,
+                        distanceOverVelocity: distanceOverVelocity
+                    });
+                }
+            }
+        
+            // Perform the reflection for the ball
+            
+            let yReflection = null;
+            let maxDistanceOverVelocity = -1;
+            for (let reflectI = 0; reflectI < reflections.length; reflectI++) {
+                if (reflections[reflectI].distanceOverVelocity > maxDistanceOverVelocity) {
+                    maxDistanceOverVelocity = reflections[reflectI].distanceOverVelocity;
+                    yReflection = reflections[reflectI].yReflect;
+                }
+            }
+            if (yReflection !== null) {
+                ball.reflect(yReflection);
             }
         }
         if (anyBrickCollisions) {
@@ -391,7 +450,7 @@ MyGame.screens['game-play'] = (function(game, input, gameState, renderer) {
 
     function loadNewPaddle() {
         gameState.setPaddleLength(100);
-        gameState.setPaddleX(500);
+        gameState.setPaddleX(START_PADDLE_CENTER);
         gameState.setPaddleVisibility(true);
 
         if (gameState.getExtraPaddleCount() > 0) {

@@ -21,7 +21,7 @@ function ParticleSystem(spec, graphics, context) {
     
     that.initiate = function() {
         let keepMe = [];
-        for (let i = 0; i < 250; i++) {
+        for (let i = 0; i < 170; i++) {
             let positionX = (Math.random() * (spec.position.xMax - spec.position.xMin)) + spec.position.xMin;
             let positionY = (Math.random() * (spec.position.yMax - spec.position.yMin)) + spec.position.yMin;
 

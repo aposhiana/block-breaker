@@ -76,19 +76,28 @@ MyGame.renderer = (function(gameState) {
         // Draw paddle
         if (gameState.getPaddleVisibility()) {
             let PADDLE_START_Y = 930;
-            let PADDLE_HEIGHT = 20;
+            let PADDLE_HEIGHT = 25;
             let paddleLen = gameState.getPaddleLength();
             let startPaddle = gameState.getPaddleX() - (paddleLen / 2);
+
             context.beginPath();
-            context.strokeStyle = '#FFFFFF';
+            context.strokeStyle = '#665d47';
             context.lineWidth = 1;
             context.moveTo(startPaddle, PADDLE_START_Y);
             context.lineTo(startPaddle + paddleLen, PADDLE_START_Y);
             context.lineTo(startPaddle + paddleLen, PADDLE_START_Y + PADDLE_HEIGHT);
             context.lineTo(startPaddle, PADDLE_START_Y + PADDLE_HEIGHT);
             context.closePath();
-            context.fillStyle = '#FFFFFF';
+            context.fillStyle = '#665d47';
             context.fill();
+            context.stroke();
+
+            // Draw paddle top
+            context.beginPath();
+            context.strokeStyle = 'white';
+            context.lineWidth = 6;
+            context.moveTo(startPaddle, PADDLE_START_Y + 3);
+            context.lineTo(startPaddle + paddleLen, PADDLE_START_Y + 3);
             context.stroke();
         }
         

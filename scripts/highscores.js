@@ -13,6 +13,12 @@ MyGame.screens['high-scores'] = (function(game) {
 
     let keyboard = Input.Keyboard();
 
+    function resetHighScores() {
+        localStorage['highScores'] = JSON.stringify([]);
+        let htmlNode = document.getElementById('ol-scores');
+        htmlNode.innerHTML = ''; 
+    }
+
     function goBack() {
         game.showScreen('main-menu');
         props.cancelNextRequest = true;
@@ -24,6 +30,7 @@ MyGame.screens['high-scores'] = (function(game) {
             game.showScreen('main-menu');
         });
         document.getElementById('high-scores-back').addEventListener('click', goBack);
+        document.getElementById('high-scores-reset').addEventListener('click', resetHighScores);
     }
 
     function signalLoop(time) {
