@@ -6,31 +6,77 @@ let Input = (function() {
     // it has been slightly modified by Andrew Aposhian.
     function Keyboard() {
 		let that = {
-			keys: {},
-			handlers: []
+			keysPressed: {},
+			keysReleased: {},
+			handlers: {}
 		};
 		
 		function keyPress(e) {
-			that.keys[e.keyCode] = e.timeStamp;
+			that.keysPressed[e.keyCode] = e.timeStamp;
 		}
 		
 		function keyRelease(e) {
-			delete that.keys[e.keyCode];
+			if (that.keysPressed.hasOwnProperty(e.keyCode)) {
+				if (that.keysPressed[e.keyCode].handleOncePerPress) {
+					that.keysPressed[e.keyCode].available = true;
+				}
+				delete that.keysPressed[e.keyCode];
+			}
+
+
+			// This will be deleted when handled
+			that.keysReleased[e.keyCode] = e.timeStamp;
 		}
 		
 		//
 		// Allows the client code to register a keyboard handler
-		that.registerCommand = function(key, handler) {
-			that.handlers.push({ key: key, handler: handler });
+		that.registerCommand = function(key, handler, onRelease, handleOncePerPress) {
+			if (!that.handlers.hasOwnProperty(key)) {
+				that.handlers[key] = {
+					handleOncePerPress: false,
+					available: true,
+					handlersForPressed: [],
+					handlersForRelease: []
+				};
+			}
+			
+			if ((typeof handleOncePerPress !== 'undefined') && handleOncePerPress) {
+				that.handlers[key].handleOncePerPress = handleOncePerPress;
+			}
+
+			if ((typeof onRelease !== 'undefined') && onRelease) {
+				that.handlers[key].handlersForRelease.push(handler);
+			}
+			else {
+				that.handlers[key].handlersForPressed.push(handler);
+			}
 		};
 		
 		//
 		// Allows the client to invoke all the handlers for the registered key/handlers
 		that.handleEvents = function(elapsedTime) {
-			for (let i = 0; i < that.handlers.length; i++) {
-                let handler = that.handlers[i];
-				if (that.keys.hasOwnProperty(handler.key)) {
-					handler.handler(elapsedTime);
+			for (let key in that.keysPressed) {
+				if (that.handlers.hasOwnProperty(key)) {
+					for (let handlerIdx = 0; handlerIdx < that.handlers[key].handlersForPressed.length; handlerIdx++) {
+						let currentHandler = that.handlers[key].handlersForPressed[handlerIdx];
+						if (that.handlers[key].available) {
+							currentHandler(elapsedTime);
+							if (that.handlers[key].handleOncePerPress) {
+								that.handlers[key].available = false;
+							}
+						}
+					}
+				}
+			}
+
+			for (let key in that.keysPressed) {
+				if (that.handlers.hasOwnProperty(key)) {
+					for (let handlerIdx = 0; handlerIdx < that.handlers[key].handlersForRelease.length; handlerIdx++) {
+						let currentHandler = that.handlers[key].handlersForRelease[handlerIdx];
+						if (that.handlers[key].available) {
+							currentHandler(elapsedTime);
+						}
+					}
 				}
 			}
 		};

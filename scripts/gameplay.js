@@ -104,7 +104,13 @@ MyGame.screens['game-play'] = (function(game, input, gameState, renderer) {
 
         keyboard.registerCommand(input.keyCodes.DOM_VK_ESCAPE, function() {
             props.cancelNextRequest = true;
-            game.showScreen('paused-menu');
+            if (gameState.getState() === 'gameover') {
+                gameState.setNewGameProperty(true);
+                game.showScreen('main-menu');
+            }
+            else {
+                game.showScreen('paused-menu');
+            }
         });
         keyboard.registerCommand(input.keyCodes.DOM_VK_RIGHT, function(elapsedTime) {
             stateChanges.paddleX += elapsedTime;
@@ -466,6 +472,8 @@ MyGame.screens['game-play'] = (function(game, input, gameState, renderer) {
     }
 
     function gamePlayUpdate(elapsedTime) {
+        updatePositions(elapsedTime);
+        
         if (!handleWallCollisions()) {
             if (!handlePaddleCollisions()) {
                 handleBrickCollisions();
@@ -508,8 +516,6 @@ MyGame.screens['game-play'] = (function(game, input, gameState, renderer) {
                 updateHighScores(gameState.getScore());
             }
         }
-
-        updatePositions(elapsedTime);
     }
 
     function gameOverUpdate(elapsedTime) {
