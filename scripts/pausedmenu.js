@@ -8,7 +8,8 @@ MyGame.screens['paused-menu'] = (function(game, gameState) {
 
     let props = {
         lastTimeStamp: performance.now(),
-        cancelNextRequest: false
+        cancelNextRequest: false,
+        focus: 0
     };
 
     let keyboard = Input.Keyboard();
@@ -23,6 +24,16 @@ MyGame.screens['paused-menu'] = (function(game, gameState) {
             game.showScreen('main-menu');
             props.cancelNextRequest = true;
         });
+        keyboard.registerCommand(Input.keyCodes.DOM_VK_DOWN, function() {
+            if (props.focus < 1) {
+                props.focus++;
+            } 
+        }, false, true);
+        keyboard.registerCommand(Input.keyCodes.DOM_VK_UP, function() {
+            if (props.focus > 0) {
+                props.focus--;
+            } 
+        }, false, true);
     }
 
     function signalLoop(time) {
@@ -30,6 +41,12 @@ MyGame.screens['paused-menu'] = (function(game, gameState) {
         props.lastTimeStamp = time;
         if (!props.cancelNextRequest) {
             requestAnimationFrame(signalLoop);
+        }
+        if (props.focus === 0) {
+            document.getElementById('button-resume').focus();
+        }
+        else if (props.focus === 1) {
+            document.getElementById('button-quit-game').focus();
         }
     }
 

@@ -8,7 +8,8 @@ MyGame.screens['high-scores'] = (function(game) {
 
     let props = {
         lastTimeStamp: performance.now(),
-        cancelNextRequest: false
+        cancelNextRequest: false,
+        focus: 0
     };
 
     let keyboard = Input.Keyboard();
@@ -29,6 +30,18 @@ MyGame.screens['high-scores'] = (function(game) {
             props.cancelNextRequest = true;
             game.showScreen('main-menu');
         });
+
+        keyboard.registerCommand(Input.keyCodes.DOM_VK_DOWN, function() {
+            if (props.focus < 1) {
+                props.focus++;
+            } 
+        }, false, true);
+        keyboard.registerCommand(Input.keyCodes.DOM_VK_UP, function() {
+            if (props.focus > 0) {
+                props.focus--;
+            } 
+        }, false, true);
+
         document.getElementById('high-scores-back').addEventListener('click', goBack);
         document.getElementById('high-scores-reset').addEventListener('click', resetHighScores);
     }
@@ -41,6 +54,13 @@ MyGame.screens['high-scores'] = (function(game) {
         }
         else {
             highScores = [];
+        }
+
+        if (props.focus === 0) {
+            document.getElementById('high-scores-back').focus();
+        }
+        else if (props.focus === 1) {
+            document.getElementById('high-scores-reset').focus();
         }
 
         let htmlNode = document.getElementById('ol-scores');

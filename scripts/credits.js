@@ -28,6 +28,7 @@ MyGame.screens['credits'] = (function(game) {
 
     function signalLoop(time) {
         keyboard.handleEvents(time - props.lastTimeStamp);
+        document.getElementById('credits-back').focus();
         props.lastTimeStamp = time;
         if (!props.cancelNextRequest) {
             requestAnimationFrame(signalLoop);

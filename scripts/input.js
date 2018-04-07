@@ -16,9 +16,9 @@ let Input = (function() {
 		}
 		
 		function keyRelease(e) {
-			if (that.keysPressed.hasOwnProperty(e.keyCode)) {
-				if (that.keysPressed[e.keyCode].handleOncePerPress) {
-					that.keysPressed[e.keyCode].available = true;
+			if (that.handlers.hasOwnProperty(e.keyCode)) {
+				if (that.handlers[e.keyCode].handleOncePerPress) {
+					that.handlers[e.keyCode].available = true;
 				}
 				delete that.keysPressed[e.keyCode];
 			}

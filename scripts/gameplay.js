@@ -518,10 +518,6 @@ MyGame.screens['game-play'] = (function(game, input, gameState, renderer) {
         }
     }
 
-    function gameOverUpdate(elapsedTime) {
-        stateChanges.paddleX = 0;
-    }
-
     function render(elapsedTime) {
         renderer.render(props.context, elapsedTime);
     }
